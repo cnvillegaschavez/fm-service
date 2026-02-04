@@ -2731,3 +2731,638 @@ Esta tabla define los términos clave que el sistema utiliza para clasificar sol
 - **RN-11.13.5**: El sistema NO permite asignar proveedores a solicitudes de criticidad ALTA sin verificación previa
 - **RN-11.13.6**: Si una solicitud de criticidad ALTA no es verificada en 2 horas, el sistema envía alerta al Supervisor de MTTO
 - **RN-11.13.7**: Los términos de la tabla de clasificación son configurables solo por el Superadministrador
+## 12. Módulo de Solicitud de Cotización
+
+**Propósito**: Gestionar el proceso completo de solicitud, recepción y análisis de cotizaciones de proveedores para la atención de incidencias. Permite a Service Desk FM y Supervisor de MTTO seleccionar proveedores, al área de Compras coordinar las cotizaciones, y a los proveedores cargar sus propuestas a través del Portal de Proveedores.
+
+### 12.1. Selección de Proveedores
+
+**Descripción**: Funcionalidad que permite a Service Desk FM y Supervisor de MTTO seleccionar uno o más proveedores para solicitar cotización.
+
+**Roles Autorizados**:
+- Service Desk FM
+- Supervisor de MTTO
+
+**Criterios de Selección**:
+- Especialidad del proveedor (debe coincidir con la categoría de la incidencia)
+- Disponibilidad del proveedor (activo en el sistema)
+- Histórico de desempeño (calificación, cumplimiento de plazos)
+- Cobertura geográfica (sede del cliente)
+
+**Opciones del Sistema**:
+- Selección múltiple de proveedores (mínimo 1, recomendado 3)
+- Filtros por especialidad, ubicación, calificación
+- Vista de historial de desempeño de cada proveedor
+- Opción de derivar a Compras si requiere gestión especializada
+
+**Derivación a Compras**:
+- **Cuándo**: Servicios especializados o de alto monto
+- **Acción**: Cambia estado a "En Cotización - Compras"
+- **Notificación Automática**: Sistema envía correo a Compras con:
+  - Código de solicitud
+  - Descripción de incidencia
+  - Categoría y Unidad de MTTO
+  - Cliente y sede
+  - Criticidad
+  - **Enlace de carga de cotización** (para compartir con proveedores)
+
+### 12.2. Generación de Enlaces de Cotización
+
+**Descripción**: Sistema genera enlaces únicos para que cada proveedor cargue su cotización.
+
+**Características del Enlace**:
+- URL única por proveedor y por solicitud
+- Formato: `https://proveedores.fm.ruwaytech.com/cotizacion/{token}`
+- Token de seguridad único
+- Acceso directo sin login (o con login si el proveedor ya tiene cuenta)
+
+**Generación Automática**:
+- Se genera al seleccionar proveedores
+- Se incluye en correo manual enviado por Compras
+- Enlace expira según fecha límite de respuesta
+
+**Seguridad**:
+- Token único no reutilizable
+- Solo el proveedor asignado puede acceder
+- Expira automáticamente después de fecha límite
+
+### 12.3. Portal de Proveedores - Carga de Cotización
+
+**Descripción**: Interfaz en Portal de Proveedores para que proveedores carguen sus cotizaciones.
+
+**Acceso**:
+- Mediante enlace único recibido por correo
+- Portal independiente: `https://proveedores.fm.ruwaytech.com`
+- Autenticación automática con token o login manual
+
+**Formulario de Carga de Cotización**:
+
+| Campo | Tipo | Obligatorio | Validaciones | Descripción |
+|-------|------|-------------|--------------|-------------|
+| **Archivo de Cotización** | Archivo | Sí | PDF, XLS, XLSX, DOC, DOCX; Max 10MB | Documento con la propuesta |
+| **Monto Total** | Numérico | Sí | Mayor a 0, máximo 2 decimales | Monto total cotizado |
+| **Moneda** | Lista desplegable | Sí | Soles (PEN) / Dólares (USD) | Moneda de cotización |
+| **Tiempo de Entrega** | Numérico | Sí | Mayor a 0, en días | Días para completar servicio |
+| **Validez de Cotización** | Numérico | Sí | Mayor a 0, en días | Días de vigencia de la propuesta |
+| **Observaciones** | Texto libre | No | Máximo 500 caracteres | Comentarios adicionales |
+
+**Validaciones al Cargar**:
+- Validación de formato de archivo permitido
+- Validación de tamaño máximo (10 MB)
+- Escaneo antivirus del archivo
+- Monto debe ser numérico y mayor a 0
+- Tiempo de entrega debe ser numérico
+
+**Acciones del Sistema**:
+- Al cargar exitosamente: notifica a Service Desk FM y Compras
+- Marca estado de cotización como "Recibida"
+- Permite al proveedor ver confirmación de carga exitosa
+- Bloquea edición después de enviar (requiere contacto con FM para cambios)
+
+### 12.4. Bandeja de Cotizaciones para FM/Compras
+
+**Descripción**: Interfaz para que Service Desk FM, Supervisor de MTTO y Compras visualicen y comparen cotizaciones recibidas.
+
+**Vista de Lista de Cotizaciones**:
+
+**Filtros Disponibles**:
+- Por solicitud (código SRV-AAAA-NNNN)
+- Por proveedor
+- Por estado (Pendiente/Recibida/Aprobada/Rechazada)
+- Por fecha de solicitud
+- Por criticidad de la incidencia
+- Derivadas a Compras (Sí/No)
+
+**Columnas de la Vista**:
+- Código de solicitud
+- Descripción de incidencia (resumen)
+- Proveedores solicitados vs proveedores que respondieron
+- Montos cotizados (comparativa)
+- Tiempos de entrega
+- Estado de cada cotización
+- Fecha límite de respuesta
+- Acciones (Ver detalle, Aprobar, Rechazar)
+
+**Vista de Comparación**:
+- Tabla comparativa lado a lado de todas las cotizaciones
+- Columnas: Proveedor, Monto, Moneda, Tiempo Entrega, Validez
+- Destacado visual del menor monto y menor tiempo
+- Acceso a archivos de cotización de cada proveedor
+- Histórico de desempeño del proveedor
+
+### 12.5. Análisis y Aprobación de Cotización
+
+**Descripción**: Funcionalidad para que FM seleccione y apruebe la mejor cotización.
+
+**Roles Autorizados**:
+- Service Desk FM
+- Supervisor de MTTO
+- Compras (si fue derivado)
+
+**Proceso de Aprobación**:
+
+**Requisito Previo**: Debe haber al menos 1 cotización cargada
+
+**Análisis Disponible**:
+- Comparación de montos (convertidos a misma moneda si aplica)
+- Comparación de tiempos de entrega
+- Histórico de desempeño de proveedores
+- Calificaciones de servicios anteriores
+
+**Aprobación**:
+- Selección del proveedor ganador
+- Campo opcional: Justificación de selección
+- Confirmación de aprobación
+- Sistema marca automáticamente las demás cotizaciones como "Rechazadas"
+
+**Acciones del Sistema al Aprobar**:
+1. Actualiza estado de cotización a "Aprobada"
+2. Rechaza automáticamente las demás cotizaciones de la misma solicitud
+3. Genera **enlace de programación de servicio** único para el proveedor aprobado
+4. Envía notificación automática al proveedor aprobado con:
+   - Confirmación de aprobación
+   - Monto aprobado
+   - **Link de programación**
+   - Indicación: "La recepción del servicio debe ser en un plazo máximo de 3 días calendario"
+5. Envía notificación a proveedores no seleccionados (cotizaciones rechazadas)
+6. Registra en auditoría
+
+### 12.6. Campos del Módulo de Cotización
+
+| Campo | Tipo | Obligatorio | Descripción |
+|-------|------|-------------|-------------|
+| **Código de Solicitud** | Texto (referencia) | Sí | Código de la solicitud de incidencia (SRV-AAAA-NNNN) |
+| **Proveedores Seleccionados** | Lista múltiple | Sí | Proveedores a los que se solicita cotización |
+| **Estado de Cotización** | Lista | Sí | Pendiente / En Proceso / Recibida / Aprobada / Rechazada |
+| **Derivado a Compras** | Sí/No | Sí | Indica si requiere gestión de Compras |
+| **Fecha de Solicitud** | Fecha/Hora | Sí | Fecha en que se solicita cotización |
+| **Fecha Límite de Respuesta** | Fecha | Sí | Plazo para recibir cotizaciones |
+| **Enlace de Carga** | URL (autogenerado) | Sí | Link único para cada proveedor |
+| **Archivo de Cotización** | Archivo | Sí | Documento cargado por el proveedor |
+| **Monto Cotizado** | Numérico | Sí | Monto total de la cotización |
+| **Moneda** | Lista | Sí | Soles (PEN) / Dólares (USD) |
+| **Tiempo de Entrega** | Numérico | Sí | Días estimados para completar el servicio |
+| **Validez de Cotización** | Numérico | Sí | Días de validez de la propuesta |
+| **Observaciones Proveedor** | Texto libre | No | Comentarios adicionales del proveedor |
+| **Proveedor Seleccionado** | Lista | No | Proveedor aprobado (después del análisis) |
+| **Fecha de Aprobación** | Fecha/Hora | No | Fecha en que se aprueba la cotización |
+| **Usuario que Aprueba** | Texto | No | Service Desk FM o Supervisor que aprueba |
+| **Justificación de Selección** | Texto libre | No | Razón por la cual se eligió ese proveedor |
+
+### 12.7. Notificaciones del Módulo de Cotización
+
+| Evento | Destinatarios | Medio | Tipo |
+|--------|---------------|-------|------|
+| Solicitud derivada a Compras | Área de Compras | Correo | Automático |
+| Solicitud de cotización a proveedor | Proveedores seleccionados | Correo | **Manual** (por Compras) |
+| Proveedor carga cotización | Service Desk FM + Compras | Correo | Automático |
+| Cotización aprobada (incluye link programación) | Proveedor seleccionado | Correo | Automático |
+| Cotización rechazada | Proveedores no seleccionados | Correo | Automático |
+| Plazo de cotización próximo a vencer (24h) | Proveedores sin respuesta | Correo | Automático |
+
+### 12.8. Validaciones del Módulo de Cotización
+
+- Debe haber al menos 1 proveedor seleccionado para solicitar cotización
+- El enlace de carga de cotización es único y expira después de la fecha límite de respuesta
+- Solo el proveedor asignado puede acceder a su enlace de carga
+- No se puede aprobar una cotización sin que haya sido cargada por el proveedor
+- El sistema debe validar que el archivo de cotización tenga formato permitido (PDF, Excel, Word)
+- Archivo debe pasar escaneo antivirus antes de almacenarse
+- Al aprobar una cotización, el sistema automáticamente rechaza las demás cotizaciones de la misma solicitud
+- Validación de campos numéricos (monto > 0, tiempo entrega > 0)
+
+### 12.9. Reglas de Negocio del Módulo de Cotización
+
+- **RN-12.1**: Si el servicio requiere especialización, debe derivarse obligatoriamente a Compras
+- **RN-12.2**: El enlace de carga de cotización es único por proveedor y por solicitud
+- **RN-12.3**: Las cotizaciones vencidas (fuera de fecha límite) quedan marcadas como "Expiradas" automáticamente
+- **RN-12.4**: Solo Service Desk FM, Supervisor de MTTO y Compras pueden aprobar cotizaciones
+- **RN-12.5**: Al aprobar una cotización, el sistema genera automáticamente el enlace de programación de servicio
+- **RN-12.6**: El monto cotizado debe registrarse en la moneda original (PEN o USD) para posterior conversión si es necesario
+- **RN-12.7**: El proveedor no puede editar ni eliminar su cotización después de enviarla
+- **RN-12.8**: La notificación manual a proveedores (por Compras) se realiza fuera del sistema
+
+### 12.10. Auditoría del Módulo de Cotización
+
+- Fecha y hora de solicitud de cotización
+- Proveedores seleccionados
+- Usuario que solicita cotización
+- Derivación a Compras (si aplica)
+- Fecha de carga de cada cotización
+- Proveedor que carga cotización
+- Monto cotizado y moneda
+- Fecha de aprobación/rechazo
+- Usuario que aprueba/rechaza
+- Justificación de selección (opcional)
+
+---
+
+## 13. Módulo de Programación de Servicio
+
+**Propósito**: Gestionar la programación de fechas de inicio de servicio por parte de los proveedores aprobados. Permite al proveedor definir el tipo de servicio (nacional o importación), registrar fechas de inicio, y al Supervisor de MTTO validar y coordinar la programación final.
+
+### 13.1. Generación de Enlace de Programación
+
+**Descripción**: Sistema genera automáticamente un enlace único para que el proveedor aprobado programe la fecha de inicio del servicio.
+
+**Generación Automática**:
+- Se genera al aprobar una cotización
+- Formato: `https://proveedores.fm.ruwaytech.com/programacion/{token}`
+- Token único de seguridad
+- Incluido en correo de notificación de aprobación
+
+**Contenido del Correo de Aprobación**:
+- Confirmación de aprobación de cotización
+- Código de solicitud
+- Monto aprobado
+- **Link de programación de servicio**
+- Indicación importante: "La recepción del servicio debe ser en un plazo máximo de 3 días calendario de aprobada la cotización"
+
+**Seguridad del Enlace**:
+- Token único por proveedor y por solicitud
+- Solo el proveedor aprobado puede acceder
+- Expira después de 30 días de emitido
+- Acceso directo sin login o con credenciales del proveedor
+
+### 13.2. Portal de Proveedores - Formulario de Programación
+
+**Descripción**: Interfaz en Portal de Proveedores donde el proveedor selecciona tipo de servicio y fecha de inicio.
+
+**Acceso**:
+- Mediante enlace único recibido por correo
+- Portal: `https://proveedores.fm.ruwaytech.com`
+- Autenticación automática con token o login manual
+
+**Formulario de Programación**:
+
+| Campo | Tipo | Obligatorio | Validaciones | Descripción |
+|-------|------|-------------|--------------|-------------|
+| **Tipo de Servicio** | Lista desplegable | Sí | Nacional / Importación | Define restricción de plazo |
+| **Fecha de Inicio Propuesta** | Calendario (fecha) | Sí | Ver validaciones por tipo | dd/mm/yyyy |
+| **Observaciones** | Texto libre | No | Máximo 500 caracteres | Comentarios sobre la programación |
+
+**Validaciones por Tipo de Servicio**:
+
+**Si es NACIONAL**:
+- Fecha propuesta NO puede exceder 3 días calendario desde fecha de aprobación de cotización
+- Fecha no puede ser anterior a fecha actual
+- Sistema calcula automáticamente plazo máximo (Fecha aprobación + 3 días calendario)
+- Muestra mensaje: "Plazo máximo: {fecha calculada}"
+
+**Si es IMPORTACIÓN**:
+- Sistema libera restricción de 3 días
+- Permite seleccionar cualquier fecha futura
+- Recomienda justificar el plazo en campo observaciones
+- Muestra mensaje: "Sin restricción de plazo - Importación"
+
+**Comportamiento del Sistema**:
+- Al seleccionar tipo "Nacional": Bloquea fechas posteriores a 3 días calendario
+- Al seleccionar tipo "Importación": Habilita calendario completo
+- Valida que fecha no sea anterior a hoy
+- Permite campo de observaciones para justificar plazos
+
+### 13.3. Validación de Programación por Supervisor MTTO
+
+**Descripción**: Funcionalidad que permite al Supervisor de MTTO revisar y aprobar/rechazar la programación propuesta por el proveedor.
+
+**Rol Autorizado**:
+- Supervisor de MTTO
+
+**Notificación Automática**:
+- **Cuándo**: Proveedor envía fecha propuesta
+- **Destinatario**: Supervisor de MTTO
+- **Medio**: Correo electrónico
+- **Contenido**: Código de solicitud, proveedor, tipo de servicio, fecha propuesta, link al sistema
+
+**Interfaz de Validación**:
+
+**Vista de Detalle**:
+- Código de solicitud
+- Descripción de la incidencia
+- Proveedor asignado
+- Monto aprobado
+- Tipo de servicio (Nacional/Importación)
+- Fecha propuesta por proveedor
+- Observaciones del proveedor
+- Plazo máximo (si es nacional)
+- Cliente y sede
+
+**Opciones del Supervisor**:
+- **Aprobar**: Da VB a la programación
+- **Rechazar**: Solicita nueva fecha al proveedor
+- **Campo obligatorio si rechaza**: Motivo del rechazo
+
+**Acciones al Aprobar**:
+- Actualiza estado a "Programación Validada"
+- Permite continuar con coordinación final
+- Notifica al proveedor de la aprobación
+- Habilita campo de "Fecha Confirmada"
+
+**Acciones al Rechazar**:
+- Actualiza estado a "Programación Rechazada"
+- Notifica al proveedor con motivo de rechazo
+- Reabre formulario de programación para el proveedor
+- Proveedor debe proponer nueva fecha
+
+### 13.4. Coordinación Final y Confirmación de Fecha
+
+**Descripción**: Proceso de coordinación manual entre Supervisor MTTO y proveedor para confirmar detalles operativos finales.
+
+**Coordinación Manual** (FUERA DEL SISTEMA):
+- **Actor**: Supervisor de MTTO
+- **Medio**: Correo electrónico o WhatsApp
+- **Propósito**: Confirmar detalles operativos, punto de contacto en sede, requisitos especiales
+- **Nota**: Esta coordinación es manual y no se registra automáticamente en el sistema
+
+**Registro de Fecha Confirmada en el Sistema**:
+
+**Actor**: Supervisor de MTTO
+
+**Funcionalidad**: Registrar la fecha final coordinada
+
+**Campo**:
+- **Fecha Confirmada**: Fecha definitiva de inicio de servicio
+- **Formato**: dd/mm/yyyy
+- **Validación**: No puede ser anterior a hoy
+
+**Acciones del Sistema al Confirmar Fecha**:
+1. Actualiza estado a "Servicio Programado"
+2. Registra fecha confirmada
+3. Genera notificaciones:
+   - Al cliente (información del servicio programado)
+   - Al proveedor (confirmación final)
+4. Programa recordatorios automáticos:
+   - 24 horas antes del servicio: Correo + WhatsApp
+   - 2 horas antes del servicio: WhatsApp
+5. Registra en auditoría
+
+### 13.5. Campos del Módulo de Programación
+
+| Campo | Tipo | Obligatorio | Descripción |
+|-------|------|-------------|-------------|
+| **Código de Solicitud** | Texto (referencia) | Sí | Código de la solicitud de incidencia |
+| **Proveedor Asignado** | Texto (referencia) | Sí | Proveedor aprobado en cotización |
+| **Enlace de Programación** | URL (autogenerado) | Sí | Link único para programar servicio |
+| **Tipo de Servicio** | Lista | Sí | Nacional / Importación |
+| **Fecha de Aprobación Cotización** | Fecha/Hora | Sí | Fecha en que se aprobó la cotización |
+| **Plazo Máximo (Nacional)** | Fecha (calculado) | - | Fecha aprobación + 3 días calendario |
+| **Fecha Propuesta por Proveedor** | Fecha | Sí | Fecha que el proveedor propone |
+| **Formato de Fecha** | - | - | dd/mm/yyyy |
+| **Observaciones Proveedor** | Texto libre | No | Comentarios sobre la programación |
+| **Estado de Programación** | Lista | Sí | Pendiente / Propuesta / Validada / Rechazada / Confirmada |
+| **Validado por** | Texto (usuario) | No | Supervisor que valida |
+| **Fecha de Validación** | Fecha/Hora | No | Cuándo se validó |
+| **Requiere Reprogramación** | Sí/No | - | Indica si se rechazó la fecha |
+| **Motivo de Rechazo** | Texto libre | Sí (si rechaza) | Razón del rechazo |
+| **Fecha Confirmada** | Fecha | Sí | Fecha final coordinada |
+| **Usuario que Confirma** | Texto | Sí | Supervisor que confirma |
+| **Fecha de Confirmación** | Fecha/Hora | Sí | Cuándo se confirmó |
+
+### 13.6. Notificaciones del Módulo de Programación
+
+| Evento | Destinatarios | Medio | Tipo |
+|--------|---------------|-------|------|
+| Cotización aprobada (incluye link programación) | Proveedor aprobado | Correo | Automático |
+| Proveedor propone fecha | Supervisor de MTTO | Correo | Automático |
+| Programación validada | Proveedor | Correo | Automático |
+| Programación rechazada | Proveedor | Correo | Automático |
+| Coordinación manual de fecha | Proveedor | Correo/WhatsApp | **Manual** |
+| Fecha confirmada | Proveedor + Cliente | Correo | Automático |
+| Recordatorio 24h antes del servicio | Proveedor + Supervisor MTTO | Correo + WhatsApp | Automático |
+| Recordatorio 2h antes del servicio | Proveedor + Supervisor MTTO | WhatsApp | Automático |
+
+### 13.7. Validaciones del Módulo de Programación
+
+- El enlace de programación solo está activo después de aprobar la cotización
+- Solo el proveedor aprobado puede acceder al enlace de programación
+- Para servicios **Nacionales**: La fecha propuesta NO puede exceder 3 días calendario desde la aprobación de cotización
+- Para servicios de **Importación**: No hay restricción de tiempo, pero debe justificarse el plazo en observaciones
+- El Supervisor de MTTO debe validar la programación antes de que el servicio inicie
+- No se puede confirmar una programación sin la aprobación del Supervisor de MTTO
+- El sistema debe validar que la fecha propuesta no sea anterior a la fecha actual
+- La fecha confirmada queda bloqueada y solo puede modificarse con aprobación del Supervisor de MTTO
+
+### 13.8. Reglas de Negocio del Módulo de Programación
+
+- **RN-13.1**: La recepción del servicio debe ser en un plazo máximo de 3 días calendario de aprobada la cotización (solo para servicios nacionales)
+- **RN-13.2**: Para servicios de importación, se libera la restricción de 3 días calendario
+- **RN-13.3**: El enlace de programación es único por proveedor y expira después de 30 días de emitido
+- **RN-13.4**: Solo el Supervisor de MTTO puede validar o rechazar programaciones propuestas
+- **RN-13.5**: Si la programación es rechazada, el proveedor recibe notificación y debe proponer nueva fecha
+- **RN-13.6**: El sistema envía recordatorios automáticos 24h y 2h antes del inicio del servicio programado
+- **RN-13.7**: La coordinación manual (correo/WhatsApp) entre Supervisor y proveedor es externa al sistema
+- **RN-13.8**: El Supervisor de MTTO debe registrar manualmente la fecha confirmada en el sistema después de coordinar
+
+### 13.9. Auditoría del Módulo de Programación
+| **Proveedor Asignado** | Texto (referencia) | Sí | Proveedor aprobado en cotización |
+| **Enlace de Programación** | URL (autogenerado) | Sí | Link único para programar servicio |
+| **Tipo de Servicio** | Lista | Sí | Nacional / Importación |
+| **Fecha de Aprobación Cotización** | Fecha/Hora | Sí | Fecha en que se aprobó la cotización |
+| **Fecha Propuesta por Proveedor** | Fecha | Sí | Fecha que el proveedor propone para inicio |
+| **Formato de Fecha** | - | - | dd/mm/yyyy |
+| **Plazo Máximo (Nacional)** | Cálculo automático | - | Fecha aprobación + 3 días calendario |
+| **Observaciones Proveedor** | Texto libre | No | Comentarios del proveedor sobre la programación |
+| **Estado de Programación** | Lista | Sí | Pendiente / Propuesta por Proveedor / Validada / Rechazada / Confirmada |
+| **Validado por** | Texto (usuario) | No | Supervisor de MTTO que valida |
+| **Fecha de Validación** | Fecha/Hora | No | Fecha en que se valida la programación |
+| **Fecha Confirmada** | Fecha | No | Fecha final coordinada para inicio de servicio |
+| **Requiere Reprogramación** | Sí/No | - | Indica si se rechazó la fecha propuesta |
+| **Motivo de Rechazo** | Texto libre | No | Razón por la cual se rechazó la fecha |
+
+### 13.4. Notificaciones del Proceso de Programación
+
+| Evento | Destinatarios | Medio | Tipo |
+|--------|---------------|-------|------|
+| Cotización aprobada (incluye link programación) | Proveedor aprobado | Correo | Automático |
+| Proveedor propone fecha | Supervisor de MTTO | Correo | Automático |
+| Programación validada | Proveedor | Correo | Automático |
+| Programación rechazada | Proveedor | Correo | Automático |
+| Fecha confirmada | Proveedor + Cliente | Correo | Automático |
+| Recordatorio 24h antes del servicio | Proveedor + Supervisor MTTO | Correo + WhatsApp | Automático |
+| Recordatorio 2h antes del servicio | Proveedor + Supervisor MTTO | WhatsApp | Automático |
+| Coordinación manual de fecha | Proveedor | Correo/WhatsApp | **Manual** |
+
+### 13.5. Validaciones del Módulo de Programación
+
+- El enlace de programación solo está activo después de aprobar la cotización
+- Solo el proveedor aprobado puede acceder al enlace de programación
+- Para servicios **Nacionales**: La fecha propuesta NO puede exceder 3 días calendario desde la aprobación de cotización
+- Para servicios de **Importación**: No hay restricción de tiempo, pero debe justificarse el plazo
+- El Supervisor de MTTO debe validar la programación antes de que el servicio inicie
+- No se puede confirmar una programación sin la aprobación del Supervisor de MTTO
+- El sistema debe validar que la fecha propuesta no sea anterior a la fecha actual
+
+### 13.6. Reglas de Negocio del Módulo de Programación
+
+- **RN-13.1**: La recepción del servicio debe ser en un plazo máximo de 3 días calendario de aprobada la cotización (solo para servicios nacionales)
+- **RN-13.2**: Para servicios de importación, se libera la restricción de 3 días calendario
+- **RN-13.3**: El enlace de programación es único por proveedor y expira después de 30 días de emitido
+- **RN-13.7**: La coordinación manual (correo/WhatsApp) entre Supervisor y proveedor es externa al sistema
+- **RN-13.8**: El Supervisor de MTTO debe registrar manualmente la fecha confirmada en el sistema después de coordinar
+
+### 13.9. Auditoría del Módulo de Programación
+
+- Fecha de emisión del enlace de programación
+- Proveedor que accede al enlace
+- Tipo de servicio seleccionado (Nacional/Importación)
+- Fecha propuesta por proveedor
+- Usuario (Supervisor) que valida/rechaza
+- Fecha y hora de validación/rechazo
+- Motivo de rechazo (si aplica)
+- Fecha confirmada final
+- Cambios en la fecha confirmada (si hay reprogramaciones)
+- Usuario que confirma la fecha final
+- Notificaciones enviadas
+
+---
+
+## 14. Portal de Proveedores
+
+**Propósito**: Proporcionar una interfaz web independiente para que los proveedores puedan cargar cotizaciones, programar servicios y gestionar sus asignaciones de manera segura y eficiente.
+
+### 14.1. Características del Portal de Proveedores
+
+**URL del Portal**: `https://proveedores.fm.ruwaytech.com`
+
+**Arquitectura**:
+- Portal web independiente del sistema FM interno
+- Diseño responsive (accesible desde PC, tablet y móvil)
+- Interfaz en español
+- Acceso mediante enlace directo desde correos o login tradicional
+
+**Tecnología**:
+- Front-end separado del Portal de Clientes
+- API REST para comunicación con sistema FM interno
+- Certificado SSL obligatorio (HTTPS)
+- Autenticación mediante tokens
+
+### 14.2. Seguridad y Acceso
+
+**Autenticación**:
+- Login con usuario (email del proveedor) y contraseña
+- Opción de acceso directo mediante enlace con token temporal (cotizaciones y programaciones)
+- Recuperación de contraseña mediante correo electrónico
+- Obligación de cambiar contraseña cada 3 meses (ver sección 3.1)
+
+**Permisos**:
+- Cada proveedor solo ve sus propias solicitudes asignadas
+- No puede ver cotizaciones de otros proveedores
+- No puede ver información de clientes (solo sede y tipo de incidencia)
+- No puede modificar cotizaciones o programaciones después de enviarlas (requiere contacto con FM)
+
+**Seguridad**:
+- Certificado SSL (HTTPS)
+- Enlaces con token único de un solo uso
+- Sesión expira después de 30 minutos de inactividad
+- Registro de accesos en auditoría
+
+### 14.3. Funcionalidades Disponibles en el Portal
+
+#### 14.3.1. Dashboard Principal
+
+**Elementos**:
+- Resumen de solicitudes asignadas
+- Cotizaciones pendientes de carga
+- Programaciones pendientes de confirmar
+- Servicios en ejecución
+- Historial de servicios completados
+
+**Indicadores**:
+- Cotizaciones pendientes (número)
+- Programaciones por confirmar (número)
+- Servicios próximos (en 48h)
+- Alertas de vencimiento de plazo
+
+#### 14.3.2. Módulo de Cotizaciones
+
+**Funcionalidades**:
+- Ver solicitudes de cotización recibidas
+- Cargar archivo de cotización (PDF, Excel, Word)
+- Ingresar monto, moneda, tiempo de entrega
+- Ver estado de cotización (Pendiente, Aprobada, Rechazada)
+- Historial de cotizaciones enviadas
+
+**Campos Visibles**:
+- Código de solicitud
+- Descripción de la incidencia
+- Categoría y Unidad de MTTO
+- Sede del cliente
+- Fecha límite de respuesta
+- Estado de cotización
+
+#### 14.3.3. Módulo de Programación de Servicios
+
+**Funcionalidades**:
+- Acceder a solicitudes con cotización aprobada
+- Seleccionar tipo de servicio (Nacional/Importación)
+- Proponer fecha de inicio de servicio
+- Ver validación del Supervisor de MTTO
+- Ver fecha confirmada final
+- Recibir notificaciones de recordatorios
+
+**Campos Visibles**:
+- Código de solicitud
+- Descripción del servicio
+- Monto aprobado
+- Plazo máximo (si es nacional)
+- Estado de programación
+- Fecha propuesta
+- Fecha confirmada
+
+#### 14.3.4. Perfil del Proveedor
+
+**Funcionalidades**:
+- Ver datos del proveedor (RUC, razón social, contacto)
+- Actualizar datos de contacto (email, teléfono, WhatsApp)
+- Cambiar contraseña
+- Ver histórico de servicios realizados
+- Descargar certificados de desempeño (si aplica)
+
+### 14.4. Integración con Sistema FM Interno
+
+**Sincronización**:
+- Todas las acciones en el Portal de Proveedores se sincronizan en tiempo real con el sistema FM interno
+- Las notificaciones generadas desde FM llegan automáticamente al portal
+- Los cambios de estado se reflejan instantáneamente
+
+**API REST**:
+- Endpoints seguros para carga de cotizaciones
+- Endpoints para programación de servicios
+- Endpoints para consulta de solicitudes asignadas
+- Autenticación mediante API Key y tokens JWT
+
+### 14.5. Notificaciones desde el Portal
+
+**Medios**:
+- Correo electrónico
+- Notificaciones push en el portal (cuando el proveedor está logueado)
+- WhatsApp (para recordatorios de servicios)
+
+**Eventos**:
+- Nueva solicitud de cotización asignada
+- Cotización aprobada
+- Cotización rechazada
+- Recordatorio de plazo de cotización próximo a vencer
+- Solicitud de programación disponible
+- Programación validada/rechazada
+- Recordatorio de servicio próximo (24h y 2h antes)
+
+### 14.6. Auditoría del Portal de Proveedores
+
+- Accesos al portal (login exitoso/fallido)
+- IP de acceso
+- Cotizaciones cargadas
+- Programaciones registradas
+- Modificaciones de perfil
+- Descarga de documentos
+- Tiempo de sesión
+
+### 14.7. Reglas de Negocio del Portal de Proveedores
+
+- **RN-14.1**: El Portal de Proveedores es independiente del Portal de Clientes y del sistema FM interno
+- **RN-14.2**: Cada proveedor solo puede acceder a sus propias solicitudes y cotizaciones
+- **RN-14.3**: Los enlaces con token expiran después de 30 días de emitidos
+- **RN-14.4**: El proveedor debe cambiar su contraseña cada 3 meses (ver sección 3.1)
+- **RN-14.5**: El portal debe ser accesible 24/7 con disponibilidad mínima de 99%
+- **RN-14.6**: Todos los archivos cargados deben pasar validación antivirus antes de almacenarse
+- **RN-14.7**: El proveedor no puede eliminar cotizaciones o programaciones después de enviarlas
