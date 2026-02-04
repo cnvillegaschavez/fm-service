@@ -2772,7 +2772,7 @@ Esta tabla define los términos clave que el sistema utiliza para clasificar sol
 
 **Características del Enlace**:
 - URL única por proveedor y por solicitud
-- Formato: `https://proveedores.fm.ruwaytech.com/cotizacion/{token}`
+- Formato: `https://proveedores.fm.com/cotizacion/{token}`
 - Token de seguridad único
 - Acceso directo sin login (o con login si el proveedor ya tiene cuenta)
 
@@ -2792,7 +2792,7 @@ Esta tabla define los términos clave que el sistema utiliza para clasificar sol
 
 **Acceso**:
 - Mediante enlace único recibido por correo
-- Portal independiente: `https://proveedores.fm.ruwaytech.com`
+- Portal independiente: `https://proveedores.fm.com`
 - Autenticación automática con token o login manual
 
 **Formulario de Carga de Cotización**:
