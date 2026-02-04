@@ -519,3 +519,369 @@ El módulo debe contar con las siguientes opciones de búsqueda:
 - **Correo Electrónico**: Validación de formato válido (ejemplo@dominio.com)
 - **Campos Obligatorios**: El sistema no debe permitir guardar si faltan campos obligatorios
 - **Código de Proveedor**: Único en el sistema, generado automáticamente
+
+## 7. Gestión de Equipos
+
+Sistema que permite gestionar una base de datos completa de equipos con código autogenerado basado en categoría y subcategoría. Incluye información técnica (marca, modelo, serie), ubicación geográfica, integración con códigos QR, información financiera (precio con cálculo automático de IGV), y capacidad de almacenar fotografías. Cuenta con filtros de búsqueda avanzados por todas las variables del equipo.
+
+### 7.1. Datos Generales del Equipo
+
+#### 7.1.1. Código de Equipo
+- Autogenerado por el sistema
+- Formato: [Abreviatura Categoría] + [Número Subcategoría] + [Secuencial]
+- Ejemplo: HV001 (HVAC + Ventiladores + 001)
+- Campo de solo lectura
+- Único en el sistema
+
+#### 7.1.2. Descripción del Equipo
+- Campo obligatorio
+- Detalle completo del equipo
+- Campo de texto libre
+
+#### 7.1.3. Tipo de Equipo
+- Campo con lista desplegable
+- Opciones:
+  - Equipos Mayores
+  - Equipos Menores
+
+#### 7.1.4. Marca del Equipo
+- Campo obligatorio
+- Campo de texto libre o lista desplegable
+
+#### 7.1.5. Modelo del Equipo
+- Campo obligatorio
+- Campo alfanumérico
+- Modelo específico del equipo
+
+#### 7.1.6. Número de Serie
+- Campo alfanumérico
+- Identificador único del fabricante
+
+### 7.2. Categorización del Equipo
+
+#### 7.2.1. Categoría
+El sistema cuenta con las siguientes categorías predefinidas:
+
+| Categoría | Abreviatura |
+|-----------|-------------|
+| HVAC | HV |
+| Sistema Eléctrico | SE |
+| SACI | SA |
+| Equipos de Sastrería | ES |
+| Audio y Video | AV |
+
+#### 7.2.2. Subcategoría
+El sistema cuenta con subcategorías numeradas:
+
+| Subcategoría | Código (3 dígitos) |
+|--------------|-------------------|
+| Ventiladores | 001 |
+| Tablero | 002 |
+| Panel de alarmas | 003 |
+| Vaporizador | 004 |
+| Proyector | 005 |
+| Detectores | 006 |
+| Máquina de coser | 007 |
+
+#### 7.2.3. Equipo Asociado
+- Campo opcional
+- Permite vincular el equipo con otro equipo relacionado
+- Lista desplegable con búsqueda
+
+### 7.3. Ubicación del Equipo
+
+#### 7.3.1. Ubicación
+- Campo con lista desplegable
+- Opciones:
+  - Lima
+  - Provincias
+
+#### 7.3.2. Ubicación por Sede
+- Campo con lista desplegable
+- Muestra las sedes registradas en el sistema
+- Vinculado con el módulo de Inmuebles
+
+#### 7.3.3. Departamento
+- Campo con lista desplegable
+- Catálogo de departamentos del Perú
+- Debe contar con funcionalidad de búsqueda
+
+#### 7.3.4. Provincia
+- Campo con lista desplegable
+- Catálogo de provincias del Perú
+- Se debe filtrar según el departamento seleccionado
+- Debe contar con funcionalidad de búsqueda
+
+#### 7.3.5. País
+- Campo con lista desplegable
+- Valor por defecto: Perú
+- Campo editable si el equipo se encuentra en otro país
+
+### 7.4. Información Administrativa
+
+#### 7.4.1. Centro de Costo (CECO)
+- Campo obligatorio
+- Código alfanumérico
+- Asociado al cliente o área responsable
+
+#### 7.4.2. Código QR
+- Campo para ingresar código QR del equipo
+- Permite vincular el equipo con sistema de identificación por QR
+- Campo alfanumérico
+
+### 7.5. Información Financiera
+
+#### 7.5.1. Precio del Equipo
+- Campo obligatorio
+- Formato numérico decimal
+- Precio base del equipo (sin IGV)
+
+#### 7.5.2. IGV
+- Calculado automáticamente por el sistema
+- Fórmula: Precio del Equipo × 18%
+- Campo de solo lectura
+
+#### 7.5.3. Precio Total (Incluido IGV)
+- Calculado automáticamente por el sistema
+- Fórmula: Precio del Equipo + IGV
+- Campo de solo lectura
+
+### 7.6. Fotografías del Equipo
+
+#### 7.6.1. Fotos del Equipo
+- El sistema debe permitir cargar hasta 3 fotos del equipo
+- Formatos permitidos: PNG, JPG
+- Tamaño máximo recomendado: 5MB por archivo
+- Debe mostrar vista previa de las imágenes cargadas
+- Opción para eliminar fotos individuales
+
+### 7.7. Lógica de Generación del Código de Equipo
+
+El sistema debe generar automáticamente el Código de Equipo mediante la siguiente estructura:
+
+#### Fórmula:
+```
+Código de Equipo = [Abreviatura Categoría] + [Código Subcategoría] + [Número Secuencial]
+```
+
+#### Ejemplo:
+- Categoría seleccionada: HVAC (Abreviatura: HV)
+- Subcategoría seleccionada: Ventiladores (Código: 001)
+- Número secuencial: Próximo disponible en el sistema
+- Código generado: **HV001**
+
+#### Reglas:
+- El código se genera automáticamente al guardar el registro del equipo
+- El campo es de solo lectura
+- El código debe ser único en el sistema
+- El número secuencial se incrementa automáticamente por cada nuevo equipo de la misma categoría y subcategoría
+
+### 7.8. Funcionalidades de Búsqueda
+
+El módulo debe contar con filtros de búsqueda por todas las variables:
+
+- Búsqueda por Código de Equipo
+- Búsqueda por Descripción
+- Búsqueda por Tipo de Equipo (Mayores/Menores)
+- Búsqueda por Marca
+- Búsqueda por Modelo
+- Búsqueda por Número de Serie
+- Búsqueda por Categoría
+- Búsqueda por Subcategoría
+- Búsqueda por Ubicación (Lima/Provincias)
+- Búsqueda por Sede
+- Búsqueda por Departamento
+- Búsqueda por Provincia
+- Búsqueda por Centro de Costo
+- Búsqueda por Código QR
+- Búsqueda por rango de precio
+- Filtros combinados
+
+### 7.9. Validaciones del Módulo de Equipos
+
+- **Código de Equipo**: Único en el sistema, generado automáticamente
+- **Fotos**: Máximo 3 archivos, solo formatos PNG y JPG
+- **Tamaño de archivos**: No exceder 5MB por imagen
+- **Campos obligatorios**: Código, Descripción, Tipo, Marca, Modelo, Ubicación, Centro de Costo, Precio
+- **Precio**: Debe ser un valor numérico positivo
+- **IGV**: Cálculo automático, no editable manualmente
+- **Código QR**: Debe ser único en el sistema
+- **Relación Departamento-Provincia**: La lista de provincias debe filtrarse según el departamento seleccionado
+
+## 8. Gestión de Herramientas
+
+Sistema que permite gestionar una base de datos completa de herramientas, instrumentos y suministros con código autogenerado. Incluye información técnica (marca, serie), asignación a técnicos o almacenes, ubicación geográfica, integración con códigos QR, información financiera (precio con cálculo automático de IGV), y capacidad de almacenar fotografías. Cuenta con filtros de búsqueda avanzados por todas las variables.
+
+### 8.1. Clasificación de Herramientas
+
+El sistema cuenta con tres tipos principales:
+
+| Código | Tipo | Ejemplo |
+|--------|------|---------|
+| H | Herramienta | Set de Alicates, Wincha, Martillo |
+| I | Instrumento | Pinza Amperimétrica, Pirómetro, Taladro |
+| S | Suministros | Cinta aislante, Cintillos, Tarugos |
+
+### 8.2. Datos Generales de Herramientas
+
+**Código de Herramienta**
+- Autogenerado por el sistema
+- Formato: [Tipo] + [Número Secuencial]
+- Ejemplos: H01, I02, S03
+- Campo de solo lectura
+- Único en el sistema
+
+**Descripción**
+- Campo obligatorio
+- Detalle completo de la herramienta o suministro
+- Campo de texto libre
+
+**Tipo de Herramienta**
+- Campo con lista desplegable
+- Opciones: Herramienta, Instrumento, Suministros
+- Determina el prefijo del código
+
+**Marca**
+- Campo obligatorio
+- Marca del fabricante
+- Ejemplos: Stanley, Bosch, 3M, Fluker
+
+**Número de Serie**
+- Campo alfanumérico
+- Identificador único del fabricante (cuando aplique)
+
+**Unidad de Medida**
+- Campo con lista desplegable
+- Opciones: Und (Unidad), Pqt (Paquete), Set, etc.
+
+**Cantidad**
+- Campo numérico
+- Cantidad de unidades disponibles
+
+### 8.3. Asignación
+
+**Asignado a**
+- Campo con lista desplegable
+- Opciones:
+  - Técnico (nombre del técnico)
+  - Almacén (ubicación del almacén)
+- Permite rastrear la ubicación actual de la herramienta
+
+**Ubicación**
+- Cliente asociado
+- Sede asociada
+- Ubicación específica dentro de la sede
+
+### 8.4. Información Administrativa
+
+**Fecha de Compra**
+- Campo con selector de fecha (lista desplegable)
+- Formato: DD/MM/AAAA
+- Campo obligatorio
+
+**Centro de Costo (CECO)**
+- Campo obligatorio
+- Código alfanumérico
+- Las herramientas deben estar asignadas a un centro de costo
+
+**Código QR**
+- Campo alfanumérico
+- Permite vincular la herramienta con sistema de identificación por QR
+- Debe ser único en el sistema
+
+### 8.5. Ubicación Geográfica
+
+**Departamento**
+- Campo con lista desplegable
+- Catálogo de departamentos del Perú
+
+**Distrito**
+- Campo con lista desplegable
+- Catálogo de distritos del Perú
+- Se filtra según departamento seleccionado
+
+**País**
+- Campo con lista desplegable
+- Valor por defecto: Perú
+
+### 8.6. Información Financiera
+
+**Precio sin IGV**
+- Campo obligatorio
+- Formato numérico decimal
+- Precio unitario de la herramienta
+
+**IGV**
+- Calculado automáticamente por el sistema
+- Fórmula: Precio sin IGV × 18%
+- Campo de solo lectura
+
+**Precio con IGV**
+- Calculado automáticamente por el sistema
+- Fórmula: Precio sin IGV + IGV
+- Campo de solo lectura
+
+### 8.7. Fotografías
+
+**Fotos de Herramienta**
+- El sistema debe permitir cargar hasta 3 fotos
+- Formatos permitidos: PNG, JPG, PDF
+- Tamaño máximo recomendado: 5MB por archivo
+- Debe mostrar vista previa de las imágenes cargadas
+- Opción para eliminar fotos individuales
+
+### 8.8. Catálogo de Herramientas Predefinidas
+
+El sistema incluye un catálogo inicial de herramientas comunes:
+
+| Código | Tipo | Descripción | Marca | Asignación | Unidad | Cantidad |
+|--------|------|-------------|-------|------------|--------|----------|
+| H01 | Herramienta | Set de Alicates dieléctricos | Stanley | Técnico | Und | 1 |
+| H02 | Herramienta | Set de alicates dieléctricos Universal, punta, corte | Stanley | Técnico | Und | 1 |
+| H03 | Herramienta | Wincha métrica | Stanley | Técnico | Und | 1 |
+| H04 | Herramienta | Martillo mango de goma | Stanley | Técnico | Und | 1 |
+| H05 | Herramienta | Llave francesa de 8" | Stanley | Técnico | Und | 1 |
+| H06 | Herramienta | Llave stilson de 10" | Stanley | Técnico | Und | 1 |
+| H07 | Herramienta | Set de brocas para madera | Stanley | Técnico | Und | 1 |
+| H08 | Herramienta | Set de brocas para fierro | Stanley | Técnico | Und | 1 |
+| H09 | Herramienta | Set de brocas para concreto | Stanley | Técnico | Und | 1 |
+| H10 | Herramienta | Nivel profesional | Stanley | Técnico | Und | 1 |
+| H11 | Herramienta | Cúter retráctil con seguro | Stanley | Técnico | Und | 1 |
+| I01 | Instrumento | Pinza amperimétrica de 1000 Vac | Fluker | Técnico | Und | 1 |
+| I02 | Instrumento | Pirómetro digital láser | Kusites | Técnico | Und | 1 |
+| I03 | Instrumento | Taladro eléctrico | Bosch | Técnico | Und | 1 |
+| I04 | Instrumento | Taladro atornillador con batería | Bosch | Técnico | Und | 1 |
+| S01 | Suministros | Cinta aislante | 3M | Técnico | Und | 1 |
+| S02 | Suministros | Paquete de cintillos | Nacional | Técnico | Pqt | 1 |
+| S03 | Suministros | Tarugos de PVC | Nacional | Técnico | Pqt | 1 |
+
+### 8.9. Funcionalidades de Búsqueda
+
+Filtros de búsqueda por todas las variables:
+
+- Búsqueda por Código de Herramienta
+- Búsqueda por Descripción
+- Búsqueda por Tipo (Herramienta/Instrumento/Suministros)
+- Búsqueda por Marca
+- Búsqueda por Número de Serie
+- Búsqueda por Asignado a (Técnico/Almacén)
+- Búsqueda por Cliente
+- Búsqueda por Sede
+- Búsqueda por Departamento
+- Búsqueda por Distrito
+- Búsqueda por Centro de Costo
+- Búsqueda por Código QR
+- Búsqueda por fecha de compra
+- Búsqueda por rango de precio
+- Filtros combinados
+
+### 8.10. Validaciones
+
+- **Código de Herramienta**: Único en el sistema, generado automáticamente
+- **Fotos**: Máximo 3 archivos, formatos PNG, JPG, PDF permitidos
+- **Tamaño de archivos**: No exceder 5MB por imagen
+- **Campos obligatorios**: Código, Descripción, Tipo, Marca, Asignado a, Fecha de Compra, Centro de Costo, Precio
+- **Precio**: Debe ser un valor numérico positivo
+- **IGV**: Cálculo automático, no editable manualmente
+- **Código QR**: Debe ser único en el sistema
+- **Cantidad**: Debe ser un valor numérico positivo mayor a cero
