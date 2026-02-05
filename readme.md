@@ -258,145 +258,106 @@ El módulo debe contar con las siguientes opciones de búsqueda:
 - Búsqueda por ubicación
 - Filtros combinados
 
-### 4.9. Proceso de Registro de Cliente Nuevo
+### 4.9. Funcionalidad de Registro de Cliente Nuevo
 
-**Propósito**: Gestionar el flujo completo de registro de información de clientes nuevos, desde la solicitud de datos hasta el envío de la bienvenida, incluyendo validación de historial crediticio para clientes externos.
+El sistema debe permitir el registro completo de información de clientes nuevos con las siguientes funcionalidades:
 
-Este proceso involucra la colaboración entre FM, Cliente, Service Desk y opcionalmente CVC (Central de Verificación Crediticia) para clientes externos nuevos.
+#### 4.9.1. Acceso al Módulo de Registro
 
-#### 4.9.1. Flujo del Proceso de Registro
+El sistema debe proporcionar:
+- Botón "Crear Cliente" o "Nuevo Cliente" visible en el módulo de Gestión de Clientes
+- Acceso al formulario de registro de cliente
+- Interfaz intuitiva para el ingreso de datos
 
-**Paso 1: Solicitud de Datos (Proceso Manual)**
-- **Actor**: FM
-- **Acción**: FM envía solicitud de data de usuarios a registrar al cliente
-- **Medio**: Correo electrónico
-- **Sistema**: NO se registra en el sistema. Proceso completamente manual
-- **Contenido de la Solicitud**: Formato Excel con campos requeridos
+#### 4.9.2. Validación de Duplicados
 
-**Paso 2: Cliente Envía la Data Solicitada (Proceso Manual)**
-- **Actor**: Cliente
-- **Acción**: Cliente envía la data solicitada
-- **Medio**: Correo electrónico
-- **Formato**: Excel (plantilla enviada por FM)
-- **Contenido**: Datos completos del cliente según formato estándar
+El sistema debe incluir:
+- Barra de búsqueda por RUC antes de crear un nuevo registro
+- Búsqueda automática en la base de datos al ingresar el RUC
+- Mensaje de alerta si el RUC ya existe en el sistema
+- Opción de visualizar el registro existente si se encuentra duplicado
 
-**Paso 2.1: Validación de Historial Crediticio (Solo para Clientes Externos Nuevos)**
-- **Actor**: FM
-- **Acción**: Para clientes externos nuevos, FM solicita validación de historial crediticio a CVC
-- **Proceso**: Manual, fuera del sistema
-- **Información Enviada**: Datos del cliente en formato Excel
-- **Propósito**: Verificar la solvencia crediticia del cliente antes de registrarlo
+#### 4.9.3. Formulario de Registro de Cliente
 
-**Paso 3: Derivación de Data a Service Desk**
-- **Actor**: FM
-- **Acción**: FM deriva la data recibida del cliente a Service Desk
-- **Medio**: Correo electrónico o comunicación interna
-- **Sistema**: NO se registra en el sistema
+El sistema debe contar con un formulario completo que incluya los siguientes campos:
 
-**Paso 4: Service Desk Ingresa al Sistema**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk accede al módulo de Gestión de Clientes
-- **Sistema**: Service Desk inicia sesión en el sistema FM
+**Información Básica**:
+- RUC (campo obligatorio, validación de formato)
+- Razón Social (campo obligatorio)
+- Domicilio Fiscal (campo obligatorio)
+- CECO (campo obligatorio)
+- Código de Cliente (generación automática: RUC-CECO)
 
-**Paso 5: Opción de Crear Cliente**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk selecciona la opción "Crear Cliente" o "Nuevo Cliente"
-- **Sistema**: Sistema muestra el formulario de registro de cliente
+**Clasificación**:
+- Tipo de Cliente (Público/Privado) - campo obligatorio
+- Clasificación (Interno/Externo) - campo obligatorio
+- Origen (Nacional/Extranjero) - campo obligatorio
+- País (campo obligatorio)
 
-**Paso 6: Service Desk Ingresa el RUC en la Barra de Búsqueda**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk ingresa el RUC del cliente en la barra de búsqueda
-- **Sistema**: Sistema busca si el RUC ya existe en la base de datos
-- **Propósito**: Validar si el cliente ya está registrado para evitar duplicados
+**Datos de Contacto**:
+- Email (campo obligatorio, validación de formato)
+- Teléfono (campo obligatorio)
+- WhatsApp (opcional)
 
-**Paso 7: Service Desk Verifica la Data del Cliente**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk verifica la información del cliente
-- **Sistema**: Sistema muestra los resultados de la búsqueda
+**Información Adicional**:
+- Representantes (gestión de representantes legales)
+- Usuarios (gestión de usuarios asociados al cliente)
+- Sucursales (gestión de sucursales del cliente)
 
-**Decisión: ¿Cliente Existe?**
+#### 4.9.4. Validaciones del Sistema
 
-**Caso A: Cliente NO Existe**
-- **Sistema**: No se encuentra ningún registro con ese RUC
-- **Siguiente Paso**: Ir a **Paso 10 - Registrar al Cliente**
+El sistema debe validar:
+- Campos obligatorios completos antes de permitir guardar
+- Formato correcto del RUC
+- Formato válido de email
+- Unicidad del RUC en la base de datos
+- Formato del código de cliente generado automáticamente
 
-**Caso B: Cliente SÍ Existe**
-- **Sistema**: Se encuentra un registro existente con ese RUC
-- **Siguiente Paso**: Ir a **Paso 8 - Verificar si la Data es la Misma**
+#### 4.9.5. Generación Automática de Código de Cliente
 
-**Paso 8: Decisión - ¿Misma Data?**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk compara la data recibida con la data existente en el sistema
-- **Opciones**:
-  - **SÍ - La data es la misma**: Ir a **Paso 9 - Enviar Correo de Bienvenida**
-  - **NO - La data es diferente**: Actualizar la data del cliente
+El sistema debe:
+- Generar automáticamente el Código de Cliente con el formato: RUC-CECO
+- Mostrar el código generado en el formulario
+- Permitir visualización del código antes de guardar el registro
 
-**Paso 8.1: Service Desk Actualiza la Data (Si la data NO es la misma)**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk actualiza los campos modificados del cliente
-- **Sistema**: 
-  - Sistema registra los cambios en auditoría
-  - Guarda la nueva información
-  - Registra usuario y fecha de actualización
-- **Siguiente Paso**: Ir a **Paso 9 - Enviar Correo de Bienvenida**
+#### 4.9.6. Actualización de Datos de Cliente Existente
 
-**Paso 9: Service Desk Envía Correo de Bienvenida**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk envía correo de bienvenida al cliente
-- **Sistema**: Puede ser manual o mediante el sistema
-- **Asunto del Correo**: "Bienvenido a Ruwaytech"
-- **Siguiente Paso**: Ir a **Paso 11 - Sistema Envía Correo a Cliente**
+Si el cliente ya existe en el sistema, el sistema debe permitir:
+- Visualizar los datos actuales del cliente
+- Editar campos modificables
+- Comparar datos actuales con datos nuevos
+- Guardar cambios realizados
+- Registrar auditoría de las modificaciones
 
-**Paso 10: Service Desk Registra al Cliente (Si el cliente NO existe)**
-- **Actor**: Service Desk FM
-- **Acción**: Service Desk completa todos los campos del formulario de registro
-- **Sistema**: 
-  - Sistema genera automáticamente el Código de Cliente (RUC-CECO)
-  - Valida que todos los campos obligatorios estén completos
-  - Registra el nuevo cliente en la base de datos
-  - Genera log de auditoría con usuario y fecha de creación
-- **Datos a Registrar**:
-  - RUC
-  - Razón Social
-  - Domicilio Fiscal
-  - CECO
-  - Tipo de Cliente (Público/Privado)
-  - Clasificación (Interno/Externo)
-  - Nacional/Extranjero
-  - País
-  - Email
-  - Teléfono
-  - WhatsApp
-  - Representantes
-  - Usuarios
-  - Sucursales
+#### 4.9.7. Auditoría y Trazabilidad
 
-**Paso 11: Sistema Envía Correo a Cliente (Proceso Automático)**
-- **Actor**: Sistema
-- **Acción**: Sistema envía automáticamente correo de bienvenida al cliente
-- **Asunto**: "Bienvenido a Ruwaytech"
-- **Destinatario**: Email del cliente registrado
-- **Contenido**: 
-  - Mensaje de bienvenida
+El sistema debe registrar automáticamente:
+- Usuario que creó el registro
+- Fecha y hora de creación
+- Usuario que realizó modificaciones
+- Fecha y hora de cada actualización
+- Historial de cambios en campos críticos
+- Log completo de auditoría
+
+#### 4.9.8. Funcionalidad de Envío de Correo de Bienvenida
+
+El sistema debe incluir:
+- Opción para enviar correo de bienvenida al cliente registrado
+- Plantilla de correo predefinida con:
+  - Asunto: "Bienvenido a Ruwaytech"
+  - Mensaje de bienvenida personalizado
   - Código de cliente generado
   - Instrucciones de acceso al portal (si aplica)
   - Información de contacto de FM
-- **Fin del Proceso**
+- Envío automático al email registrado del cliente
+- Confirmación de envío exitoso
 
-#### 4.9.2. Validación de Historial Crediticio (Clientes Externos Nuevos)
+#### 4.9.9. Consideraciones Especiales para Clientes Externos
 
-**Propósito**: Para clientes externos nuevos, es necesario validar su historial crediticio antes de proceder con el registro.
-
-**Proceso:**
-1. FM identifica que el cliente es externo y nuevo
-2. FM solicita validación de historial crediticio a CVC (Central de Verificación Crediticia)
-3. FM envía data del cliente en formato Excel
-4. CVC realiza la validación (proceso externo)
-5. CVC devuelve resultado a FM
-6. Si la validación es exitosa, FM procede con el Paso 3 (derivar a Service Desk)
-7. Si la validación falla, FM notifica al cliente y no procede con el registro
-
-**Importante**: Este paso solo aplica para **clientes externos nuevos**.
+**Nota Importante**: Para clientes externos nuevos, existe un proceso de validación de historial crediticio que se realiza **fuera del sistema** antes de proceder con el registro en el sistema. Este proceso involucra:
+- Validación con CVC (Central de Verificación Crediticia)
+- Aprobación previa antes del ingreso al sistema
+- Una vez aprobado, se procede con el registro normal en el sistema
 
 #### 4.9.3. Formato de Data de Cliente
 
@@ -1416,100 +1377,152 @@ Precio de Venta = Costo del Servicio × (1 + FEE)
   - IGV
   - Total con IGV
 
-### 9.10. Flujo del Proceso de Contrato
+### 9.10. Funcionalidad del Proceso de Gestión de Contratos
 
-#### Paso 1: Solicitud de Contrato (Proceso Manual - Fuera del Sistema)
-- **Actor**: FM
-- **Acción**: FM solicita contrato al cliente por correo electrónico o comunicación directa
-- **Sistema**: NO se registra en el sistema. Este paso es completamente manual
-- **Estado**: No aplica (proceso externo al sistema)
+El sistema debe permitir la gestión integral del ciclo de vida de los contratos con las siguientes funcionalidades:
 
-#### Paso 2: Inicio del Registro - Inicio del Registro - Recepción de Contrato
-- **Actor**: Cliente
-- **Acción**: Después de la solicitud manual (Paso 1), el cliente tiene dos opciones:
-  - **Opción A (Manual)**: Cliente envía contrato por correo → Gerente de FM crea el registro en el sistema y carga el contrato
-  - **Opción B (Portal)**: Cliente crea el registro y carga el contrato directamente desde el Portal de Clientes
-- **Sistema**: 
-  - El contrato se registra por primera vez en el sistema (independientemente de la opción)
-  - El Gerente de FM o el Cliente ingresan los datos generales del contrato (código, fechas, moneda, etc.)
-  - Se genera el código de contrato automáticamente
-  - Se carga el documento inicial
-- **Notificación**: Sistema notifica a FM y Gerente de FM
-- **Estado**: Recibido (primer estado en el sistema)
+#### 9.10.1. Registro Inicial de Contrato
 
-#### Paso 3: Revisión y Observaciones
-- **Actor**: FM
-- **Acción**: FM revisa el contrato y registra observaciones en el sistema
-- **Sistema**: FM coloca observaciones en el sistema
-- **Estado**: En Revisión → Con Observaciones
+El sistema debe proporcionar:
+- **Dos modalidades de ingreso**:
+  - **Modalidad A**: Registro manual por Gerente de FM cuando el cliente envía el contrato por correo
+  - **Modalidad B**: Carga directa por el cliente desde el Portal de Clientes
+- **Formulario de registro** con campos:
+  - Generación automática del código de contrato
+  - Fecha de solicitud
+  - Fechas de vigencia y vencimiento
+  - Selección de moneda (S/. o $)
+  - Carga del documento inicial (PDF)
+  - Datos generales del contrato
+- **Estado inicial**: "Recibido"
+- **Notificación automática** a FM y Gerente de FM
 
-#### Paso 4: Envío de Observaciones al Cliente
-- **Actor**: FM
-- **Acción**: FM envía observaciones desde el sistema
-- **Sistema**: 
-  - Sistema envía email al cliente con las observaciones
-  - Sistema notifica al cliente (email/sistema)
-- **Estado**: Observaciones Enviadas
+#### 9.10.2. Funcionalidad de Revisión y Observaciones
 
-#### Paso 5: Recepción de Contrapropuesta
-- **Actor**: Cliente
-- **Acción**: Cliente tiene dos opciones:
-  - **Opción A (Manual)**: Cliente envía contrapropuesta por correo → FM carga la contrapropuesta al sistema
-  - **Opción B (Portal)**: Cliente carga la contrapropuesta directamente desde el Portal de Clientes
-- **Sistema**: La contrapropuesta queda registrada en el sistema (independientemente de la opción)
-- **Notificación**: Sistema notifica automáticamente a FM
-- **Estado**: Contrapropuesta Recibida
+El sistema debe incluir:
+- Sección para registro de observaciones al contrato
+- Campo de texto para detallar cada observación
+- Opción de marcar observaciones como críticas o menores
+- Cambio automático de estado a "En Revisión" → "Con Observaciones"
+- Historial de observaciones registradas
+- Indicador de fecha y usuario que registró cada observación
 
-#### Paso 6: Envío a Legal
-- **Actor**: FM
-- **Acción**: FM envía contrato a Legal (proceso manual - correo)
-- **Sistema**: FM actualiza estado en el sistema
-- **Notificación**: Sistema notifica a Legal
-- **Estado**: En Revisión Legal
+#### 9.10.3. Envío Automático de Observaciones
 
-#### Paso 7: Observaciones de Legal
-- **Actor**: Legal
-- **Acción**: Legal envía observaciones y correcciones por correo (proceso manual)
-- **Sistema**: FM registra las observaciones de Legal en el sistema
-- **Estado**: Legal con Observaciones
+El sistema debe permitir:
+- Botón "Enviar Observaciones al Cliente"
+- Generación automática de email con las observaciones registradas
+- Notificación al cliente por correo electrónico
+- Actualización automática del estado a "Observaciones Enviadas"
+- Registro de fecha y hora de envío
+- Confirmación de envío exitoso
 
-#### Paso 8: Segunda Propuesta
-- **Actor**: FM
-- **Acción**: FM envía 2da propuesta al cliente
-- **Sistema**: FM carga nueva versión del contrato
-- **Notificación**: Sistema notifica al cliente
-- **Estado**: Propuesta Enviada
+#### 9.10.4. Gestión de Contrapropuestas
 
-#### Paso 9: Aceptación del Cliente
-- **Actor**: Cliente
-- **Acción**: Cliente acepta propuesta (proceso manual)
-- **Sistema**: FM actualiza el estado en el sistema
-- **Notificación**: Sistema notifica a Gerente de FM
-- **Estado**: Aceptado
+El sistema debe proporcionar:
+- **Recepción de contrapropuestas** por dos vías:
+  - Carga manual por FM cuando el cliente envía por correo
+  - Carga directa por el cliente desde el Portal de Clientes
+- **Versionamiento de documentos**:
+  - Almacenamiento de cada versión del contrato
+  - Numeración automática de versiones (v1, v2, v3, etc.)
+  - Historial de versiones con fecha de carga
+- **Notificación automática** a FM cuando se recibe contrapropuesta
+- **Actualización de estado** a "Contrapropuesta Recibida"
 
-#### Paso 10: Habilitación de Firma Electrónica
-- **Actor**: Sistema
-- **Acción**: Sistema habilita automáticamente opción de firma electrónica
-- **Notificación**: Sistema notifica a FM
-- **Estado**: En Firma
+#### 9.10.5. Gestión de Revisión Legal
 
-#### Paso 11: Gestión de Firmas
-- **Actor**: FM
-- **Acción**: FM gestiona el proceso de firmas electrónicas
-- **Sistema**: Sistema registra cada firma con validadores del sistema
-- **Estado**: En Firma
+El sistema debe incluir:
+- Actualización de estado a "En Revisión Legal"
+- Notificación automática al área Legal
+- Sección para registrar observaciones de Legal
+- Campo de texto para detallar correcciones solicitadas
+- Cambio de estado a "Legal con Observaciones"
+- Historial de observaciones legales
 
-#### Paso 12: Contrato Firmado
-- **Actor**: Sistema
-- **Acción**: Sistema valida que todas las firmas estén completadas
-- **Notificación**: Sistema notifica a Gerente General
-- **Estado**: Firmado
+#### 9.10.6. Gestión de Propuestas
 
-#### Paso 13: Envío Final al Cliente
-- **Actor**: FM
-- **Acción**: FM envía contrato firmado al cliente
-- **Sistema**: Sistema archiva el contrato
-- **Estado**: Finalizado
+El sistema debe permitir:
+- Carga de nueva versión del contrato (2da propuesta)
+- Actualización automática del número de versión
+- Envío automático de notificación al cliente
+- Cambio de estado a "Propuesta Enviada"
+- Registro de fecha de envío
+- Opción de agregar comentarios a la propuesta enviada
+
+#### 9.10.7. Funcionalidad de Aceptación
+
+El sistema debe proporcionar:
+- Opción para marcar el contrato como "Aceptado"
+- Actualización automática del estado a "Aceptado"
+- Notificación automática a Gerente de FM
+- Registro de fecha de aceptación
+- Confirmación visual de la aceptación
+
+#### 9.10.8. Habilitación de Firma Electrónica
+
+El sistema debe incluir:
+- Activación automática de la opción de firma electrónica cuando el contrato es aceptado
+- Cambio automático de estado a "En Firma"
+- Notificación automática a FM
+- Interfaz de gestión de firmas
+- Indicador de firmas pendientes y completadas
+
+#### 9.10.9. Gestión de Firmas Electrónicas
+
+El sistema debe permitir:
+- Registro de cada firma con validadores del sistema
+- Identificación de firmantes requeridos
+- Seguimiento del estado de cada firma (Pendiente/Completada)
+- Validación de identidad del firmante
+- Almacenamiento seguro de las firmas digitales
+- Certificación de fecha y hora de cada firma
+- Generación de hash de verificación
+
+#### 9.10.10. Validación de Contrato Firmado
+
+El sistema debe proporcionar:
+- Validación automática de que todas las firmas estén completadas
+- Actualización automática del estado a "Firmado"
+- Notificación automática a Gerente General
+- Generación del contrato final con todas las firmas
+- Registro de fecha de finalización del proceso de firmas
+- Sello de tiempo del documento firmado
+
+#### 9.10.11. Archivado y Finalización
+
+El sistema debe incluir:
+- Opción de envío del contrato firmado al cliente
+- Archivado automático del contrato en estado "Finalizado"
+- Actualización del estado a "Finalizado"
+- Almacenamiento seguro del documento final
+- Generación de reporte de cierre del contrato
+- Registro completo del historial del proceso
+
+#### 9.10.12. Notificaciones Automáticas del Sistema
+
+El sistema debe enviar notificaciones automáticas en los siguientes eventos:
+- Registro de nuevo contrato → Notifica a FM y Gerente de FM
+- Observaciones enviadas → Notifica al Cliente
+- Contrapropuesta recibida → Notifica a FM
+- Envío a Legal → Notifica a Legal
+- Propuesta enviada → Notifica al Cliente
+- Contrato aceptado → Notifica a Gerente de FM
+- Firma electrónica habilitada → Notifica a FM
+- Contrato firmado → Notifica a Gerente General
+
+#### 9.10.13. Trazabilidad y Auditoría
+
+El sistema debe registrar:
+- Usuario que realizó cada acción
+- Fecha y hora de cada cambio de estado
+- Historial completo de versiones del documento
+- Registro de todas las observaciones
+- Log de notificaciones enviadas
+- Historial de firmas electrónicas
+- Auditoría completa del ciclo de vida del contrato
+
+**Nota Importante**: La solicitud inicial de contrato al cliente se realiza **fuera del sistema** mediante correo electrónico o comunicación directa. El sistema entra en funcionamiento a partir del registro inicial del contrato (cuando el cliente o FM carga el primer documento).
 
 ### 9.11. Portal de Clientes - Bandeja de Contratos
 
@@ -2182,113 +2195,175 @@ El catálogo maestro de 3 niveles (ver sección 11.2.1) se mantiene completo par
 | | | VIDRIO TEMPLADO - PUERTAS |
 | | | VIDRIOS - LIMPIEZA |
 
-### 11.3. Flujo del Proceso de Solicitud de Atención
+### 11.3. Funcionalidad de Solicitud de Atención de Incidencias
 
-#### Paso 1: Usuario Ingresa al Sistema
-- **Actor**: Usuario (Cliente, Empleado interno)
-- **Acción**: Usuario accede al módulo de "Solicitud de Atención de Incidencia"
-- **Sistema**: Sistema muestra la pantalla principal de creación de solicitud
+El sistema debe permitir la creación y gestión de solicitudes de atención de incidencias con las siguientes funcionalidades:
 
-#### Paso 2: Usuario Ingresa la Razón de Atención de Incidencia
-- **Actor**: Usuario
-- **Acción**: Usuario selecciona "Nueva Solicitud" o "Crear Incidencia"
-- **Sistema**: Sistema muestra el formulario de solicitud
+#### 11.3.1. Acceso al Módulo de Solicitud
 
-#### Paso 3: Sistema Muestra el Tipo de Solicitud
-- **Actor**: Sistema
-- **Acción**: Sistema presenta lista desplegable con los tipos de solicitud
-- **Opciones**: Mantenimiento / Suministros
+El sistema debe proporcionar:
+- Módulo "Solicitud de Atención de Incidencia" accesible desde el menú principal
+- Botón "Nueva Solicitud" o "Crear Incidencia" visible y destacado
+- Pantalla principal con historial de solicitudes previas del usuario
+- Interfaz intuitiva y responsiva para crear solicitudes
 
-#### Paso 4: Usuario Selecciona el Tipo de Solicitud
-- **Actor**: Usuario
-- **Acción**: Usuario selecciona el tipo de solicitud desde la lista desplegable
-- **Campo**: Obligatorio
-- **Sistema**: El sistema permite crear, modificar, eliminar data de categoría a nivel administrador
+#### 11.3.2. Funcionalidad de Tipo de Solicitud
 
-#### Paso 5: Sistema Muestra Categorías de Acuerdo a Tipo
-- **Actor**: Sistema
-- **Acción**: Sistema filtra y muestra las categorías (Grupos de MTTO) disponibles según el tipo de solicitud seleccionado
-- **Formato**: Lista desplegable dinámica
+El sistema debe incluir:
+- Lista desplegable con los tipos de solicitud disponibles:
+  - Mantenimiento
+  - Suministros
+- Campo obligatorio
+- Gestión administrativa de tipos de solicitud (crear, modificar, eliminar) a nivel administrador
+- Validación de selección antes de continuar
 
-#### Paso 6: Usuario Selecciona la Categoría (Nivel 1)
-- **Actor**: Usuario
-- **Acción**: Usuario selecciona la CATEGORIA desde la lista desplegable
-- **Ejemplo**: ÁREAS VERDES, CERRAJERÍA, HVAC, SISTEMA ELÉCTRICO, etc.
-- **Campo**: Obligatorio
-- **Nivel**: Nivel 1 de categorización (marcado en amarillo en el catálogo)
+#### 11.3.3. Funcionalidad de Categorización Dinámica (Nivel 1)
 
-#### Paso 7: Sistema Muestra Lista de Opciones Seleccionables de Sub Categorías
-- **Actor**: Sistema
-- **Acción**: Sistema muestra las Unidades de MTTO correspondientes a la categoría seleccionada
-- **Formato**: Lista desplegable dinámica
-- **Filtrado**: Según la categoría seleccionada en el paso anterior
+El sistema debe proporcionar:
+- Lista desplegable de **CATEGORÍA** (Nivel 1) filtrada según el tipo de solicitud
+- Categorías incluidas:
+  - ÁREAS VERDES
+  - CERRAJERÍA
+  - HVAC
+  - SISTEMA ELÉCTRICO
+  - SISTEMA SANITARIO
+  - VIDRIOS Y MAMPARAS
+  - Y otras según catálogo de servicios
+- Campo obligatorio
+- Actualización dinámica al cambiar el tipo de solicitud
+- Gestión administrativa del catálogo de categorías
 
-#### Paso 8: Usuario Selecciona la Unidad de MTTO (Nivel 2)
-- **Actor**: Usuario
-- **Acción**: Usuario selecciona la UNIDAD DE MTTO desde la lista desplegable filtrada
-- **Ejemplo**: 
-  - Si seleccionó ÁREAS VERDES: JARDINERÍA, MACETEROS
-  - Si seleccionó CERRAJERÍA: CARPINTERÍA ALUMINIO, CARPINTERÍA DE MADERA, CARPINTERÍA METÁLICA
-  - Si seleccionó HVAC: AIRE ACONDICIONADO, EQUIPOS DE EXTRACCIÓN DE AIRE, EQUIPOS DE VENTILACIÓN
-- **Campo**: Obligatorio
-- **Nivel**: Nivel 2 de categorización (marcado en amarillo en el catálogo)
-- **Importante**: Este es el último nivel que el usuario selecciona. NO hay un tercer nivel para el usuario
+#### 11.3.4. Funcionalidad de Subcategorización Dinámica (Nivel 2)
 
-#### Paso 9: Sistema Muestra Campo de Descripción
-- **Actor**: Sistema
-- **Acción**: Sistema habilita el campo de descripción de la incidencia
-- **Validación**: El sistema extrae caracteres del campo de descripción (IA) para asociar con tabla de criticidad
+El sistema debe incluir:
+- Lista desplegable de **UNIDAD DE MTTO** (Nivel 2) filtrada dinámicamente según la categoría seleccionada
+- Ejemplos de filtrado dinámico:
+  - Si CATEGORÍA = ÁREAS VERDES → Mostrar: JARDINERÍA, MACETEROS
+  - Si CATEGORÍA = CERRAJERÍA → Mostrar: CARPINTERÍA ALUMINIO, CARPINTERÍA DE MADERA, CARPINTERÍA METÁLICA
+  - Si CATEGORÍA = HVAC → Mostrar: AIRE ACONDICIONADO, EQUIPOS DE EXTRACCIÓN DE AIRE, EQUIPOS DE VENTILACIÓN
+- Campo obligatorio
+- Actualización automática al cambiar la categoría
+- **Importante**: Este es el último nivel de categorización visible para el usuario
 
-#### Paso 10: Usuario Redacta la Descripción
-- **Actor**: Usuario
-- **Acción**: Usuario ingresa una descripción detallada de la incidencia
-- **Campo**: Obligatorio, texto libre
-- **Validación**: Sistema no debe permitir subir requerimientos sin descripción
-- **Análisis**: El sistema analiza el texto para determinar nivel de criticidad
+#### 11.3.5. Funcionalidad de Descripción de Incidencia
 
-#### Paso 11: Sistema Exige Imágenes del Evento
-- **Actor**: Sistema
-- **Acción**: Sistema solicita al usuario cargar imágenes relacionadas con la incidencia
-- **Formato**: PNG, JPG
-- **Tamaño Máximo**: 10 MB por imagen
-- **Validación**: Sistema no debe permitir subir requerimientos sin fotos
+El sistema debe proporcionar:
+- Campo de texto libre para descripción detallada de la incidencia
+- Campo obligatorio con validación de contenido
+- Límite mínimo de caracteres (sugerido: 20 caracteres)
+- Análisis automático del texto mediante IA para:
+  - Extracción de palabras clave
+  - Detección de nivel de urgencia
+  - Asignación automática de criticidad
+- Mensaje de error si el usuario intenta enviar sin descripción
 
-#### Paso 12: Usuario Sube las Imágenes
-- **Actor**: Usuario
-- **Acción**: Usuario carga las imágenes del evento
-- **Campo**: Obligatorio (al menos 1 imagen)
-- **Cantidad**: Máximo 3 imágenes
-- **Validación**: El sistema valida formato y tamaño de archivo
+#### 11.3.6. Funcionalidad de Carga de Imágenes
 
-#### Paso 13: Usuario Envía el Requerimiento
-- **Actor**: Usuario
-- **Acción**: Usuario presiona el botón "Enviar" o "Crear Solicitud"
-- **Sistema**: Sistema valida que todos los campos obligatorios estén completos
-- **Validación Final**: 
-  - Tipo de solicitud seleccionado
-  - Categoría completa (todos los niveles)
-  - Descripción ingresada
-  - Al menos 1 imagen cargada
+El sistema debe incluir:
+- Área de carga de imágenes con drag & drop o selector de archivos
+- Validaciones:
+  - Formatos permitidos: PNG, JPG
+  - Tamaño máximo por imagen: 10 MB
+  - Cantidad mínima: 1 imagen (obligatorio)
+  - Cantidad máxima: 3 imágenes
+- Vista previa de imágenes cargadas
+- Opción de eliminar imágenes antes de enviar
+- Mensajes de error claros para archivos que no cumplan las validaciones
+- Indicador visual de progreso de carga
 
-#### Paso 14: Sistema Categoriza de Acuerdo a Tipo de Criticidad
-- **Actor**: Sistema
-- **Acción**: Sistema analiza la descripción y asigna automáticamente un nivel de criticidad/urgencia
-- **Niveles de Criticidad**: 
+#### 11.3.7. Validación Integral del Formulario
+
+El sistema debe validar antes de permitir el envío:
+- Tipo de solicitud seleccionado
+- Categoría (Nivel 1) seleccionada
+- Unidad de MTTO (Nivel 2) seleccionada
+- Descripción ingresada con mínimo de caracteres
+- Al menos 1 imagen cargada correctamente
+- Mensaje de error específico para cada campo faltante
+- Resaltado visual de campos incompletos
+
+#### 11.3.8. Asignación Automática de Criticidad
+
+El sistema debe incluir funcionalidad de análisis inteligente para:
+- Analizar automáticamente la descripción ingresada
+- Detectar palabras clave de emergencia (urgente, crítico, emergencia, peligro, falla total, etc.)
+- Asignar automáticamente uno de tres niveles de criticidad:
   - **Alta**: Emergencias, fallas críticas que requieren atención inmediata
   - **Media**: Problemas que afectan operaciones pero no son emergencias
   - **Baja**: Solicitudes de mantenimiento preventivo o mejoras
-- **Método**: Sistema Híbrido (Reglas Determinísticas + Inteligencia Artificial)
-- **Proceso de Asignación**: Ver sección 11.14 para detalles técnicos de implementación
+- Método: Sistema Híbrido (Reglas Determinísticas + Inteligencia Artificial)
+- Mostrar el nivel de criticidad asignado al usuario antes de confirmar
+- Permitir revisión por Service Desk FM después del envío
+- Ver sección 11.14 para detalles técnicos de implementación
 
-#### Paso 15: Sistema Envía la Solicitud a Equipo FM
-- **Actor**: Sistema
-- **Acción**: Sistema genera el ticket/código de servicio y notifica al equipo correspondiente
-- **Código de Servicio**: Autogenerado por el sistema
-- **Notificaciones**: 
-  - **Criticidad Alta**: Notificación a Supervisor, Service Desk FM vía correo y WhatsApp (solo alta prioridad)
-  - **Criticidad Media/Baja**: Notificación a Service Desk FM vía correo
-- **Ticket Generado**: Sistema genera ticket o código de servicio
-- **Fin del Proceso**
+#### 11.3.9. Generación Automática de Código de Servicio/Ticket
+
+El sistema debe proporcionar:
+- Generación automática de código único al crear la solicitud
+- Formato: SRV-AAAA-NNNN
+  - SRV: Prefijo de Servicio
+  - AAAA: Año actual
+  - NNNN: Número secuencial
+- Ejemplo: SRV-2026-0001
+- Contador secuencial que se reinicia cada año
+- Campo de solo lectura
+- Visualización del código generado inmediatamente después del envío
+
+#### 11.3.10. Sistema de Notificaciones Automáticas
+
+El sistema debe enviar notificaciones automáticas según el nivel de criticidad:
+
+**Para Criticidad Alta**:
+- Notificación inmediata a Supervisor FM por correo electrónico
+- Notificación inmediata a Supervisor FM por WhatsApp
+- Notificación a Service Desk FM por correo electrónico
+- Indicador visual de "URGENTE" en la bandeja
+
+**Para Criticidad Media o Baja**:
+- Notificación a Service Desk FM por correo electrónico
+- Sin notificación por WhatsApp
+
+**Contenido de las Notificaciones**:
+- Código de servicio generado
+- Nivel de criticidad
+- Tipo de solicitud
+- Categoría y Unidad de MTTO
+- Descripción resumida
+- Cliente/Sede
+- Enlace directo a la solicitud en el sistema
+
+#### 11.3.11. Registro Automático de Información
+
+El sistema debe registrar automáticamente:
+- Fecha y hora exacta de creación de la solicitud
+- Usuario solicitante (usuario logueado)
+- Cliente y sede asociados al usuario
+- Estado inicial: "Nuevo"
+- Nivel de criticidad asignado
+- Código de servicio generado
+- Historial completo de la solicitud desde su creación
+
+#### 11.3.12. Confirmación de Envío
+
+El sistema debe mostrar:
+- Mensaje de confirmación de envío exitoso
+- Código de servicio asignado destacado
+- Resumen de la solicitud creada
+- Nivel de criticidad asignado
+- Tiempo estimado de atención (según SLA)
+- Opción de imprimir o descargar comprobante
+- Enlace para seguimiento de la solicitud
+
+#### 11.3.13. Gestión Administrativa del Catálogo
+
+El sistema debe permitir (solo usuarios administradores):
+- Crear nuevos tipos de solicitud
+- Agregar, modificar o eliminar categorías (Nivel 1)
+- Agregar, modificar o eliminar unidades de MTTO (Nivel 2)
+- Configurar relaciones entre tipos, categorías y unidades
+- Gestionar palabras clave para detección de criticidad
+- Configurar plantillas de notificación
+- Definir SLAs por categoría o criticidad
 
 ### 11.4. Generación de Código de Servicio/Ticket
 
