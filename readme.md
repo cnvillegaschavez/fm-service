@@ -1772,19 +1772,577 @@ Gestionar el tipo de cambio oficial del dólar estadounidense (USD) respecto al 
 - El usuario ve tanto el precio sin IGV como el precio con IGV
 - El IGV usado en una transacción queda registrado en el documento
 - Los documentos mantienen el IGV vigente al momento de su creación
-:
 
-**Posibles Adiciones Futuras:**
-- Catálogo de Departamentos/Provincias/Distritos
-- Catálogo de Países
-- Catálogo de Zonas Geográficas
-- Días festivos y no laborables
-- Horarios de operación
-- Tarifas y costos estándar
-- Categorías de equipos y subcategorías
-- Tipos de mantenimiento
-- Plantillas de documentos
-- Configuración de firma electrónica
+### 10.3. Catálogo de Países
+
+**Propósito**: Mantener un catálogo estandarizado de países para su uso en formularios de clientes, proveedores, ubicaciones y otros módulos del sistema.
+
+#### 10.3.1. Gestión del Catálogo de Países
+
+**Campos del Registro:**
+- **Código ISO (2 dígitos)**: Código estándar internacional (Ejemplo: PE, US, CL)
+- **Código ISO (3 dígitos)**: Código estándar internacional (Ejemplo: PER, USA, CHL)
+- **Nombre del País**: Nombre oficial completo (Ejemplo: Perú, Estados Unidos, Chile)
+- **Nombre Común**: Nombre de uso común (opcional)
+- **Código Telefónico**: Código de llamada internacional (Ejemplo: +51, +1, +56)
+- **Continente**: Lista desplegable (América, Europa, Asia, África, Oceanía)
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- Solo el **Superadministrador** puede agregar, editar o eliminar países
+- Los demás usuarios solo pueden consultar
+
+**Funcionalidades:**
+- Búsqueda por nombre o código ISO
+- Filtrado por continente
+- Exportación de catálogo completo a Excel
+- Importación masiva desde archivo Excel/CSV
+- Ordenamiento alfabético por nombre de país
+
+**Validaciones:**
+- El código ISO debe ser único en el sistema
+- No se pueden eliminar países que estén en uso en otros módulos
+- Al inactivar un país, el sistema valida que no tenga registros activos asociados
+
+**Uso en el Sistema:**
+- Módulo de Clientes (campo País)
+- Módulo de Proveedores (campo País)
+- Módulo de Equipos (País de fabricación)
+- Módulo de Inmuebles (Ubicación internacional)
+- Reportes geográficos
+
+### 10.4. Catálogo de Ubicaciones Geográficas (Perú)
+
+**Propósito**: Mantener el catálogo oficial completo de ubicaciones geográficas de Perú con estructura jerárquica Departamento > Provincia > Distrito, sincronizado con UBIGEO-INEI.
+
+#### 10.4.1. Estructura Jerárquica de Ubicaciones
+
+**Nivel 1: Departamento**
+- Código UBIGEO (2 dígitos)
+- Nombre del Departamento
+- Región Natural (Costa, Sierra, Selva)
+- Capital departamental
+- Estado (Activo/Inactivo)
+
+**Nivel 2: Provincia**
+- Código UBIGEO (4 dígitos)
+- Nombre de la Provincia
+- Departamento al que pertenece (relación jerárquica)
+- Capital provincial
+- Estado (Activo/Inactivo)
+
+**Nivel 3: Distrito**
+- Código UBIGEO (6 dígitos)
+- Nombre del Distrito
+- Provincia a la que pertenece (relación jerárquica)
+- Capital distrital
+- Zona (Urbana/Rural)
+- Estado (Activo/Inactivo)
+
+#### 10.4.2. Gestión del Catálogo de Ubicaciones
+
+**Permisos:**
+- Solo el **Superadministrador** puede modificar el catálogo
+- Gerente de FM puede visualizar y exportar
+- Los demás usuarios solo utilizan los catálogos en listas desplegables
+
+**Funcionalidades:**
+
+1. **Búsqueda y Filtrado**:
+   - Búsqueda por código UBIGEO
+   - Búsqueda por nombre (departamento, provincia, distrito)
+   - Filtrado por departamento
+   - Filtrado por provincia
+   - Filtrado por región natural
+
+2. **Gestión de Registros**:
+   - Agregar nuevos departamentos/provincias/distritos
+   - Editar información existente
+   - Activar/Inactivar registros (no se pueden eliminar)
+   - Sincronización con UBIGEO-INEI (actualización anual)
+
+3. **Importación y Exportación**:
+   - Importación masiva desde archivo Excel/CSV con formato UBIGEO
+   - Exportación del catálogo completo a Excel
+   - Descarga de plantilla de importación
+
+#### 10.4.3. Sincronización con UBIGEO-INEI
+
+**Proceso de Actualización:**
+- El sistema debe permitir la carga del catálogo UBIGEO actualizado desde INEI
+- Frecuencia: Anual (o cuando INEI publique actualizaciones)
+- El Superadministrador descarga el archivo oficial de INEI
+- El sistema valida el formato del archivo antes de importar
+- Se mantiene historial de versiones del catálogo UBIGEO
+
+**Validaciones en la Importación:**
+- Verificar que los códigos UBIGEO sean válidos (formato de 2, 4 y 6 dígitos)
+- Validar la estructura jerárquica (provincia debe pertenecer a un departamento existente)
+- Detectar duplicados por código UBIGEO
+- Alertar sobre registros nuevos o modificados
+
+#### 10.4.4. Uso en el Sistema
+
+**Módulos que Utilizan Ubicaciones Geográficas:**
+- Módulo de Clientes (Domicilio fiscal)
+- Módulo de Proveedores (Dirección, Zona de cobertura)
+- Módulo de Inmuebles/Sedes (Ubicación completa)
+- Módulo de Equipos (Ubicación del equipo)
+- Módulo de Herramientas (Ubicación)
+- Módulo de Solicitud de Atención (Ubicación de la incidencia)
+
+**Funcionamiento en Formularios:**
+- Lista desplegable 1: Departamento (nivel 1)
+- Lista desplegable 2: Provincia (se filtra según departamento seleccionado)
+- Lista desplegable 3: Distrito (se filtra según provincia seleccionada)
+- Selección en cascada: al seleccionar departamento, se cargan las provincias correspondientes
+
+#### 10.4.5. Validaciones
+
+- No se pueden eliminar ubicaciones que tengan registros asociados en el sistema
+- Al inactivar una ubicación, el sistema valida dependencias
+- Los códigos UBIGEO deben ser únicos en el sistema
+- La estructura jerárquica debe ser consistente (distrito → provincia → departamento)
+
+### 10.5. Catálogo de Tipos de Documento de Identidad
+
+**Propósito**: Estandarizar los tipos de documentos de identidad utilizados en el registro de usuarios, clientes y proveedores.
+
+#### 10.5.1. Tipos de Documento
+
+**Catálogo Estándar:**
+
+| Código | Tipo de Documento | Longitud | Validación |
+|--------|-------------------|----------|------------|
+| DNI | Documento Nacional de Identidad | 8 dígitos | Solo números |
+| CE | Carné de Extranjería | 9 dígitos | Alfanumérico |
+| RUC | Registro Único de Contribuyentes | 11 dígitos | Solo números |
+| Pasaporte | Pasaporte | 12 caracteres | Alfanumérico |
+
+**Permisos:**
+- Solo el **Superadministrador** puede modificar el catálogo
+- Otros roles solo consultan
+
+**Funcionalidades:**
+- Agregar nuevos tipos de documento
+- Editar validaciones y longitudes
+- Activar/Inactivar tipos de documento
+- No se pueden eliminar tipos en uso
+
+### 10.6. Catálogo de Monedas
+
+**Propósito**: Gestionar las monedas utilizadas en el sistema para transacciones financieras.
+
+#### 10.6.1. Monedas Configuradas
+
+**Catálogo Estándar:**
+
+| Código | Moneda | Símbolo | País | Estado |
+|--------|--------|---------|------|--------|
+| PEN | Sol Peruano | S/. | Perú | Activo |
+| USD | Dólar Estadounidense | $ | Estados Unidos | Activo |
+| EUR | Euro | € | Unión Europea | Inactivo (configurable) |
+
+**Campos del Registro:**
+- **Código ISO (3 dígitos)**: Código estándar (PEN, USD, EUR)
+- **Nombre de la Moneda**: Nombre completo
+- **Símbolo**: Representación visual (S/., $, €)
+- **País Principal**: País de origen
+- **Decimales**: Cantidad de decimales permitidos (2 por defecto)
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- Solo el **Gerente de FM** puede activar/inactivar monedas
+- Solo el **Superadministrador** puede agregar nuevas monedas
+
+**Validaciones:**
+- Solo se pueden usar monedas activas en transacciones nuevas
+- No se pueden inactivar monedas con transacciones activas
+- Debe haber al menos una moneda activa en el sistema
+
+### 10.7. Catálogo de Categorías y Tipos de Equipos
+
+**Propósito**: Estandarizar la clasificación de equipos en el sistema para facilitar su gestión, búsqueda y reportes.
+
+#### 10.7.1. Estructura de Categorías de Equipos
+
+**Nivel 1: Categoría Principal**
+- Equipos Principales (equipos críticos para la operación)
+- Equipos Auxiliares (equipos de soporte)
+- Componentes (partes y piezas)
+
+**Nivel 2: Subcategoría**
+- Eléctricos
+- Mecánicos
+- Electrónicos
+- Hidráulicos
+- Climatización
+- Seguridad
+- Comunicaciones
+- Otros
+
+**Permisos:**
+- **Superadministrador**: CRUD completo
+- **Gerente de FM**: Agregar y editar
+- Otros roles: Solo consulta
+
+**Funcionalidades:**
+- Crear nuevas categorías y subcategorías
+- Editar nombres y descripciones
+- Activar/Inactivar categorías
+- Definir iconos o colores para cada categoría (visual)
+- Exportar catálogo completo
+
+### 10.8. Catálogo de Marcas de Equipos
+
+**Propósito**: Mantener un listado estandarizado de marcas de equipos para facilitar el registro y búsqueda.
+
+#### 10.8.1. Gestión de Marcas
+
+**Campos del Registro:**
+- **Nombre de la Marca**: Texto (Ejemplo: LG, Samsung, Carrier, Trane)
+- **País de Origen**: Relación con catálogo de países
+- **Categoría Principal**: Tipo de equipos que fabrica
+- **Sitio Web**: URL (opcional)
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- **Superadministrador y Gerente de FM**: Pueden agregar marcas
+- Otros roles: Solo consulta
+
+**Funcionalidades:**
+- Búsqueda por nombre de marca
+- Filtrado por país de origen
+- Filtrado por categoría principal
+- Ordenamiento alfabético
+- Autocompletado en formularios
+
+**Validaciones:**
+- Nombre de marca debe ser único
+- No se pueden eliminar marcas con equipos registrados
+
+### 10.9. Catálogo de Unidades de Medida
+
+**Propósito**: Estandarizar las unidades de medida utilizadas en inventarios, cotizaciones y órdenes de servicio.
+
+#### 10.9.1. Unidades de Medida Estándar
+
+**Catálogo:**
+
+| Código | Unidad | Tipo | Descripción |
+|--------|--------|------|-------------|
+| UND | Unidad | Cantidad | Unidad individual |
+| M | Metro | Longitud | Metro lineal |
+| M2 | Metro Cuadrado | Área | Superficie |
+| M3 | Metro Cúbico | Volumen | Volumen |
+| KG | Kilogramo | Peso | Masa |
+| LT | Litro | Volumen | Capacidad líquida |
+| HR | Hora | Tiempo | Hora de trabajo/servicio |
+| GLN | Galón | Volumen | Capacidad líquida |
+| PZA | Pieza | Cantidad | Pieza individual |
+| SET | Set | Conjunto | Conjunto de piezas |
+| PAR | Par | Cantidad | Par de unidades |
+
+**Campos del Registro:**
+- **Código**: Abreviatura estándar
+- **Nombre**: Nombre completo de la unidad
+- **Tipo**: Cantidad, Longitud, Área, Volumen, Peso, Tiempo
+- **Descripción**: Explicación del uso
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- **Superadministrador**: CRUD completo
+- Otros roles: Solo consulta
+
+### 10.10. Catálogo de Tipos de Mantenimiento
+
+**Propósito**: Clasificar los tipos de mantenimiento para solicitudes, órdenes de trabajo y reportes.
+
+#### 10.10.1. Tipos de Mantenimiento
+
+**Catálogo Estándar:**
+
+| Código | Tipo de Mantenimiento | Descripción | Frecuencia Típica |
+|--------|----------------------|-------------|-------------------|
+| PREV | Preventivo | Mantenimiento programado | Mensual, Trimestral, Semestral, Anual |
+| CORR | Correctivo | Reparación de fallas | Según necesidad |
+| PRED | Predictivo | Basado en monitoreo de condiciones | Según análisis |
+| EMER | Emergencia | Atención urgente 24/7 | Inmediato |
+| MEJORA | Mejora | Optimización de sistemas | Según proyecto |
+
+**Campos del Registro:**
+- **Código**: Abreviatura única
+- **Nombre del Tipo**: Nombre descriptivo
+- **Descripción**: Definición del tipo de mantenimiento
+- **Nivel de Prioridad por Defecto**: Alta, Media, Baja
+- **Color de Identificación**: Para visualización en calendarios
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- **Gerente de FM**: Puede agregar y editar
+- **Superadministrador**: CRUD completo
+- Otros roles: Solo consulta
+
+### 10.11. Catálogo de Criticidad de Equipos
+
+**Propósito**: Clasificar equipos según su criticidad para priorizar el mantenimiento y atención.
+
+#### 10.11.1. Niveles de Criticidad
+
+**Catálogo Estándar:**
+
+| Nivel | Criticidad | Descripción | Tiempo de Respuesta |
+|-------|------------|-------------|---------------------|
+| 1 | Crítico | Equipo esencial para operación | Inmediato (< 2 horas) |
+| 2 | Alto | Equipo importante para operación | Urgente (< 24 horas) |
+| 3 | Medio | Equipo necesario sin impacto crítico | Normal (< 72 horas) |
+| 4 | Bajo | Equipo de respaldo o baja utilización | Programado (< 7 días) |
+
+**Campos del Registro:**
+- **Nivel**: Valor numérico (1-4)
+- **Nombre**: Crítico, Alto, Medio, Bajo
+- **Descripción**: Definición del nivel
+- **Tiempo de Respuesta Máximo**: Horas o días
+- **Color de Alerta**: Para indicadores visuales
+- **Estado**: Activo / Inactivo
+
+**Uso en el Sistema:**
+- Asignación de criticidad a equipos en el módulo de Equipos
+- Priorización automática de solicitudes de mantenimiento
+- Alertas y notificaciones según nivel de criticidad
+- Reportes de equipos críticos
+
+### 10.12. Catálogo de Estados de Equipos
+
+**Propósito**: Estandarizar los estados de los equipos para su gestión y control.
+
+#### 10.12.1. Estados de Equipos
+
+**Catálogo Estándar:**
+
+| Código | Estado | Descripción | Color |
+|--------|--------|-------------|-------|
+| OPE | Operativo | Equipo funcionando normalmente | Verde |
+| MTO | En Mantenimiento | Equipo en mantenimiento programado | Amarillo |
+| REP | En Reparación | Equipo en reparación | Naranja |
+| INOP | Inoperativo | Equipo fuera de servicio | Rojo |
+| BAJA | Dado de Baja | Equipo retirado del inventario | Gris |
+| RESER | Reserva | Equipo de respaldo | Azul |
+
+**Permisos:**
+- **Superadministrador**: CRUD completo
+- **Gerente de FM**: Agregar y editar
+- Otros roles: Solo consulta
+
+### 10.13. Días Festivos y No Laborables
+
+**Propósito**: Configurar días festivos y no laborables para cálculo de plazos, programación de mantenimientos y generación de reportes.
+
+#### 10.13.1. Gestión de Días Festivos
+
+**Campos del Registro:**
+- **Fecha**: Día específico (dd/mm/yyyy)
+- **Nombre del Festivo**: Descripción (Ejemplo: Año Nuevo, Fiestas Patrias)
+- **Tipo**: Nacional, Regional, Local
+- **Departamento**: Si aplica solo a una región específica
+- **Año**: Año de aplicación
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- **Superadministrador**: CRUD completo
+- **Gerente de FM**: Agregar y editar
+- Otros roles: Solo consulta
+
+**Funcionalidades:**
+- Carga masiva de días festivos anuales
+- Calendario visual con festivos marcados
+- Exportación de listado de festivos por año
+- Plantilla de importación Excel
+
+**Uso en el Sistema:**
+- Exclusión de festivos en cálculo de plazos de atención
+- Programación automática de mantenimientos preventivos
+- Alertas de servicios programados en días festivos
+- Reportes de disponibilidad de personal
+
+#### 10.13.2. Días Laborables por Defecto
+
+**Configuración:**
+- Definir días laborables de la semana (Lunes a Viernes por defecto)
+- Opción de incluir Sábados como día laboral
+- Horario laboral estándar (Ejemplo: 8:00 AM - 6:00 PM)
+
+### 10.14. Horarios de Operación
+
+**Propósito**: Configurar horarios estándar de operación del sistema FM para cálculo de tiempos de respuesta y disponibilidad de servicios.
+
+#### 10.14.1. Configuración de Horarios
+
+**Tipos de Horario:**
+- **Horario Normal**: Lunes a Viernes (8:00 AM - 6:00 PM)
+- **Horario Extendido**: Lunes a Sábado (7:00 AM - 7:00 PM)
+- **24x7**: Atención continua (emergencias)
+
+**Campos de Configuración:**
+- **Nombre del Horario**: Descripción
+- **Días de la Semana**: Selección múltiple (L, M, Mi, J, V, S, D)
+- **Hora de Inicio**: HH:MM
+- **Hora de Fin**: HH:MM
+- **Tipo de Servicio**: Normal, Emergencia, Mantenimiento
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- **Gerente de FM**: Editar horarios
+- **Superadministrador**: CRUD completo
+
+**Uso en el Sistema:**
+- Cálculo de SLA (Service Level Agreement)
+- Programación de servicios
+- Notificaciones fuera de horario
+- Cálculo de horas hombre
+
+### 10.15. Plantillas de Documentos
+
+**Propósito**: Centralizar las plantillas de documentos utilizados en el sistema para garantizar estandarización y calidad.
+
+#### 10.15.1. Tipos de Plantillas
+
+**Catálogo de Plantillas:**
+
+| Código | Plantilla | Formato | Uso |
+|--------|-----------|---------|-----|
+| COTIZ | Cotización Formal | PDF/Word | Cotizaciones a clientes |
+| OC | Orden de Compra | PDF/Excel | Órdenes a proveedores |
+| OS | Orden de Servicio | PDF | Órdenes de trabajo |
+| CERT | Certificado de Servicio | PDF | Conformidad de servicio |
+| CONTRATO | Contrato de Servicio | Word/PDF | Contratos con clientes |
+| INFORME | Informe Técnico | Word | Reportes técnicos |
+| LNT | Formato Obras Menores | Excel | Cotizaciones LNT |
+
+**Gestión de Plantillas:**
+- Carga de archivos de plantilla (.docx, .xlsx, .pdf)
+- Versionamiento de plantillas
+- Campos dinámicos configurables
+- Previsualización de plantilla
+- Descarga de plantilla activa
+
+**Campos del Registro:**
+- **Código de Plantilla**: Identificador único
+- **Nombre**: Descripción de la plantilla
+- **Tipo de Documento**: Cotización, Contrato, Orden, Certificado
+- **Archivo**: Archivo de plantilla (.docx, .xlsx)
+- **Versión**: Número de versión (v1.0, v1.1, etc.)
+- **Fecha de Creación**: Fecha de carga
+- **Usuario que Creó**: Usuario responsable
+- **Estado**: Activa / Inactiva
+
+**Permisos:**
+- **Gerente de FM**: Cargar y editar plantillas
+- **Superadministrador**: CRUD completo
+- Otros roles: Solo uso de plantillas activas
+
+### 10.16. Configuración de Correos Electrónicos
+
+**Propósito**: Centralizar las configuraciones de correo electrónico para notificaciones automáticas del sistema.
+
+#### 10.16.1. Correos de Notificación
+
+**Configuraciones:**
+
+| Tipo de Correo | Destinatario | Uso |
+|----------------|--------------|-----|
+| Correo de Soporte | soportefm@panoramabpo.com | Atención a usuarios |
+| Correo de Notificaciones | notificaciones@sistemaFM.com | Envío automático de alertas |
+| Correo de Administrador | admin@sistemaFM.com | Notificaciones críticas del sistema |
+| Correo de Gerencia | gerenciafm@panoramabpo.com | Reportes ejecutivos |
+
+**Campos de Configuración:**
+- **Tipo de Correo**: Soporte, Notificaciones, Administrador, Gerencia
+- **Dirección de Email**: Correo electrónico válido
+- **Nombre del Remitente**: Nombre que aparece en el correo
+- **Firma de Email**: Texto de firma automática
+- **Estado**: Activo / Inactivo
+
+**Permisos:**
+- **Superadministrador**: CRUD completo
+- Otros roles: Solo visualización
+
+**Validaciones:**
+- Formato de correo electrónico válido
+- No se pueden inactivar correos esenciales del sistema
+- Validación de servidor SMTP configurado
+
+### 10.17. Parámetros Generales del Sistema
+
+**Propósito**: Configurar parámetros transversales del sistema que afectan su comportamiento general.
+
+#### 10.17.1. Configuraciones Generales
+
+**Parámetros Configurables:**
+
+| Parámetro | Descripción | Valor por Defecto | Editable por |
+|-----------|-------------|-------------------|--------------|
+| Nombre de la Empresa | Nombre de la organización | Panorama BPO | Superadministrador |
+| Logo de la Empresa | Archivo de imagen del logo | - | Gerente de FM |
+| Tiempo de Sesión | Minutos antes de cerrar sesión inactiva | 30 minutos | Superadministrador |
+| Formato de Fecha | Formato de visualización de fechas | dd/mm/yyyy | Superadministrador |
+| Idioma del Sistema | Idioma de la interfaz | Español | Superadministrador |
+| Zona Horaria | Zona horaria del sistema | America/Lima (UTC-5) | Superadministrador |
+| Tamaño Máximo de Archivo | MB permitidos para carga de archivos | 10 MB | Superadministrador |
+| Días para Cambio de Contraseña | Frecuencia de actualización de contraseña | 90 días | Superadministrador |
+| Intentos de Login | Intentos fallidos antes de bloqueo | 3 | Superadministrador |
+| Longitud Mínima de Contraseña | Caracteres mínimos para contraseña | 8 | Superadministrador |
+
+**Permisos:**
+- **Superadministrador**: Editar todos los parámetros
+- **Gerente de FM**: Editar logo y nombre de empresa
+- Otros roles: Solo visualización
+
+### 10.18. Auditoría del Módulo de Datos Maestros
+
+**Registro de Auditoría:**
+
+El sistema debe registrar todas las modificaciones realizadas en los datos maestros:
+
+- Fecha y hora de modificación
+- Usuario que realizó el cambio
+- Tipo de catálogo modificado (País, Ubicación, Moneda, etc.)
+- Registro específico modificado
+- Valor anterior y valor nuevo
+- Acción realizada (Crear, Editar, Activar, Inactivar)
+- IP del usuario
+- Observaciones (si aplica)
+
+**Reportes de Auditoría:**
+- Reporte de cambios por período
+- Reporte de cambios por usuario
+- Reporte de cambios por tipo de catálogo
+- Exportación a Excel
+
+### 10.19. Validaciones Generales del Módulo
+
+- Solo usuarios autorizados pueden modificar datos maestros
+- No se pueden eliminar registros que estén en uso en otros módulos
+- Al inactivar un registro, el sistema valida dependencias
+- Los códigos únicos (ISO, UBIGEO, etc.) no pueden duplicarse
+- Los campos obligatorios deben completarse antes de guardar
+- Las importaciones masivas deben validarse antes de ejecutarse
+- Los cambios en datos maestros deben tener trazabilidad completa
+
+### 10.20. Reglas de Negocio del Módulo
+
+- **RN-10.1**: Los datos maestros son la única fuente de verdad para catálogos en el sistema
+- **RN-10.2**: Los cambios en datos maestros no afectan registros históricos ya creados
+- **RN-10.3**: El sistema debe sincronizar automáticamente con fuentes oficiales (SUNAT, INEI) cuando aplique
+- **RN-10.4**: Debe existir al menos un registro activo en cada catálogo esencial (monedas, países, ubicaciones)
+- **RN-10.5**: Los usuarios solo pueden utilizar registros activos en formularios y transacciones
+- **RN-10.6**: Las plantillas de documentos deben versionarse para mantener trazabilidad
+- **RN-10.7**: El catálogo UBIGEO debe actualizarse al menos una vez al año según publicaciones de INEI
+- **RN-10.8**: Los días festivos deben cargarse al inicio de cada año fiscal
+- **RN-10.9**: Los parámetros del sistema solo pueden ser modificados por usuarios con permisos específicos
+- **RN-10.10**: Todos los cambios en datos maestros deben quedar registrados en auditoría
+
+---
 
 ## 11. Solicitud de Atención de Incidencia
 
@@ -3281,3 +3839,488 @@ El sistema debe ejecutar automáticamente:
 - **RN-14.5**: El portal debe ser accesible 24/7 con disponibilidad mínima de 99%
 - **RN-14.6**: Todos los archivos cargados deben pasar validación antivirus antes de almacenarse
 - **RN-14.7**: El proveedor no puede eliminar cotizaciones o programaciones después de enviarlas
+
+
+## 15. Módulo de Cotización Formal para Cliente
+
+**Propósito**: Gestionar la elaboración, cálculo de FEE y envío de cotizaciones formales a clientes (internos y externos), incluyendo el proceso de aprobación y posterior solicitud de emisión de Orden de Compra (OC).
+
+### 15.1. Descripción General del Módulo
+
+El módulo de Cotización Formal para Cliente permite al Facility Manager (FM) elaborar cotizaciones basadas en las cotizaciones recibidas de proveedores, aplicar márgenes de FEE según el tipo de cliente, y gestionar el proceso de aprobación hasta la emisión de la Orden de Compra.
+
+**Características principales**:
+- Gestión de cotizaciones para clientes internos y externos
+- Cálculo automático de FEE según tipo de cliente y parámetros contractuales
+- Diferenciación de flujos de aprobación según tipo de cliente
+- Generación de formato especial de cotización en formato LNT (para obras menores)
+- Integración con sistema de emisión de Orden de Compra (OC)
+- Trazabilidad completa del proceso de cotización
+
+### 15.2. Acceso al Módulo de Cotizaciones
+
+#### 15.2.1. Ingreso al Sistema
+
+**Proceso**:
+1. FM ingresa al sistema con sus credenciales
+2. FM accede al módulo de "Cotizaciones" desde el menú principal
+3. Sistema valida permisos del usuario (solo FM y roles autorizados)
+
+**Roles con Acceso**:
+- Facility Manager (FM)
+- Gerente de FM
+- Supervisor FM
+- Gerente General (solo visualización)
+
+#### 15.2.2. Visualización de Relación de Cotizaciones
+
+**Funcionalidad del Sistema**:
+- Sistema muestra automáticamente la relación completa de cotizaciones pendientes y en proceso
+- Listado incluye cotizaciones provenientes del módulo de Solicitud de Cotización (Módulo 12)
+- Vista organizada por estado y antigüedad
+
+**Campos Visibles en el Listado**:
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| **Código de Solicitud** | Texto | Código único de la solicitud de atención |
+| **Código de Cotización** | Texto | Código autogenerado para la cotización |
+| **Cliente** | Texto | Nombre del cliente |
+| **Tipo de Cliente** | Lista | Interno / Externo |
+| **Sede** | Texto | Ubicación de la sede del cliente |
+| **Descripción de Incidencia** | Texto | Breve descripción del servicio solicitado |
+| **Proveedor Seleccionado** | Texto | Proveedor cuya cotización fue aprobada |
+| **Monto Proveedor** | Número | Monto de la cotización aprobada del proveedor |
+| **Moneda** | Lista | S/. o $ |
+| **Estado** | Lista | Pendiente / En Elaboración / Enviada / Aprobada / Rechazada |
+| **Fecha de Creación** | Fecha | Fecha en que se creó la cotización |
+| **Fecha de Envío** | Fecha | Fecha en que se envió al cliente |
+
+### 15.3. Proceso de Elaboración de Cotización
+
+#### 15.3.1. Selección de Cotización a Elaborar
+
+**Funcionalidad**:
+- FM selecciona de la lista la cotización a revisar y elaborar
+- Sistema abre la ficha completa de la cotización
+- Sistema muestra toda la información de la solicitud original y cotización de proveedor aprobada
+
+**Información Disponible**:
+- Datos del cliente y sede
+- Descripción completa de la incidencia
+- Categoría y subcategoría del servicio
+- Cotización del proveedor aprobada (monto, plazo, alcance)
+- Historial de la solicitud
+
+#### 15.3.2. Elaboración de Cotización por FM
+
+**Proceso**:
+1. FM revisa la cotización del proveedor aprobada
+2. FM elabora la cotización formal para el cliente
+3. FM ingresa o valida los siguientes datos:
+
+**Campos del Formulario de Cotización**:
+
+| Campo | Tipo | Obligatorio | Descripción |
+|-------|------|-------------|-------------|
+| **Descripción del Servicio** | Texto largo | Sí | Descripción detallada del servicio a cotizar |
+| **Alcance del Servicio** | Texto largo | Sí | Detalle del alcance incluido en la cotización |
+| **Monto Base (Proveedor)** | Número | Sí | Monto de la cotización del proveedor |
+| **Moneda** | Lista | Sí | S/. o $ |
+| **Plazo de Ejecución** | Número | Sí | Días calendario para completar el servicio |
+| **Observaciones** | Texto libre | No | Comentarios adicionales sobre la cotización |
+
+### 15.4. Cálculo Automático de FEE
+
+#### 15.4.1. Diferenciación por Tipo de Cliente
+
+**Funcionalidad del Sistema**:
+- Sistema identifica automáticamente si el cliente es **Interno** o **Externo**
+- Según el tipo de cliente, el sistema aplica diferentes reglas de cálculo de FEE
+
+#### 15.4.2. Cliente Externo: Visualización de Monto y Margen de FEE Contractual
+
+**Proceso para Cliente Externo**:
+
+1. **Sistema muestra automáticamente**:
+   - Campo de visualización: "Monto y Margen de FEE Contractual"
+   - Monto del FEE establecido en el contrato con el cliente
+   - Porcentaje de margen de FEE contractual
+   - Este campo es de solo lectura (no editable por FM)
+
+2. **FM coloca el FEE**:
+   - FM puede ajustar el FEE dentro del rango permitido
+   - Sistema valida que no exceda el margen contractual
+   - Si FM intenta exceder el margen, sistema muestra alerta
+
+3. **Sistema realiza el cálculo del FEE**:
+   - Fórmula para Cliente Externo: 
+     ```
+     Monto Total = Monto Base Proveedor + FEE + IGV
+     ```
+   - Sistema calcula automáticamente el monto total
+   - Sistema muestra desglose completo
+
+**Campos Calculados Automáticamente**:
+
+| Campo | Fórmula | Descripción |
+|-------|---------|-------------|
+| **Monto Base** | Monto Proveedor | Cotización aprobada del proveedor |
+| **FEE (S/. o $)** | Monto Base × % FEE | Monto del FEE aplicado |
+| **Subtotal** | Monto Base + FEE | Subtotal antes de IGV |
+| **IGV (18%)** | Subtotal × 0.18 | Impuesto General a las Ventas |
+| **Monto Total** | Subtotal + IGV | Monto final de la cotización |
+
+#### 15.4.3. Cliente Interno: Cálculo Directo de FEE
+
+**Proceso para Cliente Interno**:
+
+1. **Sistema omite la validación de FEE contractual**
+   - Para clientes internos no aplica restricción de margen contractual
+   - FM tiene mayor flexibilidad para establecer el FEE
+
+2. **FM coloca el FEE**:
+   - FM ingresa el porcentaje o monto de FEE a aplicar
+   - Campo editable sin restricciones de margen contractual
+
+3. **Sistema realiza el cálculo del FEE**:
+   - Fórmula para Cliente Interno:
+     ```
+     Monto Total = Monto Base Proveedor + FEE
+     ```
+   - Para clientes internos, el IGV puede no aplicarse según configuración
+   - Sistema calcula y muestra el desglose
+
+**Validaciones para Cliente Interno**:
+- FEE debe ser mayor a 0
+- El monto total debe ser razonable (alertas si excede 200% del monto base)
+- Sistema registra justificación si el FEE es mayor al 50%
+
+### 15.5. Envío de Cotización a Clientes
+
+#### 15.5.1. Preparación de Cotización para Envío
+
+**Funcionalidad del Sistema**:
+
+1. **FM revisa la cotización completa**:
+   - Verifica todos los cálculos
+   - Revisa descripción y alcance
+   - Confirma montos y plazos
+
+2. **Generación de Formato Especial (Obras Menores)**:
+   - **Nota importante**: Para obras menores, FM brindará un formato especial en la LNT (Línea de Negocio Tercerizada)
+   - Sistema debe permitir adjuntar documentos adicionales
+   - Formatos predefinidos disponibles para descarga
+
+3. **FM ejecuta acción "Enviar Cotización"**:
+   - Sistema valida que todos los campos obligatorios estén completos
+   - Sistema genera documento PDF de la cotización
+   - Sistema registra fecha y hora de envío
+
+#### 15.5.2. Envío Automático por Correo
+
+**Funcionalidad del Sistema**:
+- Sistema envía automáticamente correo electrónico a clientes con la cotización
+- Destinatarios según tipo de cliente:
+  - **Cliente Externo**: Correo registrado del representante del cliente
+  - **Cliente Interno**: Correo del personal autorizado para aprobar cotizaciones
+
+**Contenido del Correo**:
+
+**Asunto**: "Cotización [Código de Cotización] - [Descripción del Servicio]"
+
+**Cuerpo del Correo**:
+```
+Estimado(a) [Nombre del Cliente],
+
+Por medio del presente, le hacemos llegar la cotización solicitada para el siguiente servicio:
+
+Código de Cotización: [Código]
+Descripción: [Descripción del Servicio]
+Sede: [Nombre de la Sede]
+Monto Total: [Moneda] [Monto Total]
+Plazo de Ejecución: [Días] días calendario
+
+Adjunto encontrará el documento completo de la cotización con el detalle y alcance del servicio.
+
+Para aprobar la cotización, por favor ingrese al sistema a través del siguiente enlace:
+[Enlace al Portal de Clientes]
+
+Quedamos atentos a sus comentarios.
+
+Atentamente,
+[Nombre del FM]
+Facility Manager
+```
+
+**Archivos Adjuntos**:
+- PDF de la cotización formal
+- Formato especial LNT (si aplica para obras menores)
+- Documentos técnicos adicionales (si corresponde)
+
+### 15.6. Proceso de Aprobación de Cotización
+
+#### 15.6.1. Aprobación por Cliente Externo
+
+**Proceso**:
+
+1. **Cliente Externo accede al Portal de Clientes**:
+   - Cliente recibe correo con enlace de acceso
+   - Cliente ingresa al portal con sus credenciales
+   - Sistema muestra la cotización pendiente de aprobación
+
+2. **Revisión de Cotización**:
+   - Cliente visualiza el detalle completo de la cotización
+   - Puede descargar el PDF de la cotización
+   - Puede revisar alcance, montos y plazos
+
+3. **Cliente aprueba cotización en el sistema**:
+   - Cliente hace clic en botón "Aprobar Cotización"
+   - Sistema solicita confirmación de la aprobación
+   - Sistema registra fecha, hora y usuario que aprobó
+
+4. **Notificación Automática**:
+   - Sistema envía notificación automática al FM
+   - FM recibe correo informando que la cotización fue aprobada
+   - Estado cambia a "Aprobada"
+
+#### 15.6.2. Aprobación por Personal Autorizado (Cliente Interno)
+
+**Proceso**:
+
+1. **Personal Autorizado accede al sistema**:
+   - Usuario con permisos de aprobación ingresa al sistema interno
+   - Accede al módulo de aprobación de cotizaciones
+   - Sistema muestra cotizaciones pendientes de aprobación
+
+2. **Revisión de Cotización**:
+   - Personal autorizado revisa la cotización internamente
+   - Valida que esté dentro del presupuesto aprobado
+   - Puede solicitar ajustes si es necesario
+
+3. **Personal autorizado aprueba las cotizaciones en el sistema**:
+   - Usuario hace clic en "Aprobar"
+   - Sistema solicita confirmación
+   - Opción de agregar comentarios de aprobación
+
+4. **Notificación**:
+   - Sistema notifica al FM de la aprobación
+   - Estado cambia a "Aprobada"
+
+**Roles con Permiso de Aprobación (Cliente Interno)**:
+- Gerente General
+- Gerente de FM
+- Jefe de Área solicitante
+- Controller (según monto)
+
+### 15.7. Gestión de FEE Adicional y Solicitud de Orden de Compra (OC)
+
+#### 15.7.1. Colocación de FEE Adicional (Paso 13 y 15)
+
+**Funcionalidad**:
+
+1. **FM coloca el FEE** (después de aprobación inicial):
+   - En algunos casos, después de la aprobación, FM debe ajustar o confirmar el FEE final
+   - Sistema muestra nuevamente el campo de margen de FEE contractual
+   - FM confirma o ajusta el FEE para la emisión de OC
+
+2. **Sistema muestra el campo de margen de FEE contractual**:
+   - Campo de referencia con el margen establecido en el contrato
+   - Validación automática de límites
+
+3. **FM coloca el FEE final**:
+   - FM ingresa el FEE definitivo
+   - Sistema recalcula el monto total si hubo ajustes
+
+4. **Sistema realiza el cálculo del FEE**:
+   - Cálculo final con el FEE confirmado
+   - Generación del monto definitivo para la OC
+
+#### 15.7.2. Envío de Cotización para Emisión de Orden de Compra (OC)
+
+**Proceso Final**:
+
+1. **FM envía cotización solicitando emisión de OC**:
+   - FM ejecuta acción "Solicitar Emisión de OC"
+   - Sistema genera formato de cotización para OC
+   - Incluye código de correlativo para OC
+
+2. **Generación de Formato de Cotización por Proveedor**:
+   - Sistema debe elaborar el formato de cotización por proveedor según formato predefinido
+   - Incluye todos los detalles de la cotización aprobada
+   - Monto final con FEE aplicado
+   - Términos y condiciones
+
+3. **Sistema envía solicitud al área de Compras/Procurement**:
+   - Notificación automática al área de Compras
+   - Adjunta cotización aprobada y formato para OC
+   - Compras procede con la emisión de la Orden de Compra
+
+4. **Trazabilidad**:
+   - Sistema registra fecha de solicitud de OC
+   - Estado cambia a "En Proceso de OC"
+   - Se crea vínculo entre cotización y OC
+
+### 15.8. Estados de la Cotización Formal
+
+| Estado | Descripción | Acciones Disponibles |
+|--------|-------------|----------------------|
+| **Pendiente** | Cotización creada pero no elaborada | Elaborar, Editar, Eliminar |
+| **En Elaboración** | FM está trabajando en la cotización | Editar, Guardar borrador, Enviar |
+| **Enviada** | Cotización enviada al cliente | Ver, Enviar recordatorio, Cancelar |
+| **Aprobada** | Cliente aprobó la cotización | Solicitar OC, Ver detalle |
+| **Rechazada** | Cliente rechazó la cotización | Ver motivo, Renegociar, Cerrar |
+| **En Proceso de OC** | Solicitud de OC enviada a Compras | Ver estado OC, Seguimiento |
+| **OC Emitida** | Orden de Compra generada | Ver OC, Imprimir, Archivar |
+| **Cancelada** | Cotización cancelada | Solo visualización |
+
+### 15.9. Campos del Formulario de Cotización Formal
+
+| Campo | Tipo | Obligatorio | Editable | Descripción |
+|-------|------|-------------|----------|-------------|
+| **Código de Cotización** | Texto (autogenerado) | Sí | No | Código único de cotización |
+| **Código de Solicitud** | Texto (referencia) | Sí | No | Código de la solicitud original |
+| **Cliente** | Lista desplegable | Sí | No | Cliente seleccionado |
+| **Tipo de Cliente** | Lista | Sí | No | Interno / Externo |
+| **Sede** | Lista desplegable | Sí | Sí | Sede del cliente |
+| **Descripción del Servicio** | Texto largo | Sí | Sí | Detalle del servicio |
+| **Alcance del Servicio** | Texto largo | Sí | Sí | Alcance incluido |
+| **Proveedor Seleccionado** | Texto (referencia) | Sí | No | Proveedor cuya cotización se aprobó |
+| **Monto Base Proveedor** | Número | Sí | No | Monto de cotización del proveedor |
+| **Moneda** | Lista | Sí | Sí | S/. o $ |
+| **% FEE** | Número | Sí | Sí | Porcentaje de FEE a aplicar |
+| **Monto FEE** | Número (calculado) | Sí | No | Monto del FEE en moneda |
+| **Margen FEE Contractual** | Número (referencia) | Condicional | No | Solo para clientes externos |
+| **Subtotal** | Número (calculado) | Sí | No | Monto Base + FEE |
+| **IGV (18%)** | Número (calculado) | Sí | No | Impuesto calculado |
+| **Monto Total** | Número (calculado) | Sí | No | Monto final de cotización |
+| **Plazo de Ejecución** | Número | Sí | Sí | Días calendario |
+| **Observaciones** | Texto libre | No | Sí | Comentarios adicionales |
+| **Estado** | Lista | Sí | No | Estado actual de la cotización |
+| **Fecha de Creación** | Fecha/Hora | Sí | No | Fecha de creación |
+| **Fecha de Envío** | Fecha/Hora | Condicional | No | Fecha de envío a cliente |
+| **Fecha de Aprobación** | Fecha/Hora | Condicional | No | Fecha de aprobación por cliente |
+| **Usuario que Aprobó** | Texto | Condicional | No | Usuario que aprobó (cliente) |
+| **Código de OC** | Texto | Condicional | No | Código de Orden de Compra generada |
+
+### 15.10. Notificaciones del Módulo
+
+| Evento | Destinatarios | Medio | Tipo |
+|--------|---------------|-------|------|
+| Cotización elaborada | FM (confirmación) | Correo | Automático |
+| Cotización enviada a cliente | Cliente (externo/interno) | Correo | Automático |
+| Cotización aprobada | FM | Correo + Notificación interna | Automático |
+| Cotización rechazada | FM | Correo + Notificación interna | Automático |
+| Recordatorio de cotización pendiente | Cliente | Correo | Manual (FM) |
+| Solicitud de OC enviada | Área de Compras | Correo + Notificación interna | Automático |
+| OC emitida | FM + Cliente | Correo | Automático |
+
+### 15.11. Validaciones del Módulo
+
+- El monto total de la cotización debe ser mayor a 0
+- Para clientes externos, el FEE no puede exceder el margen FEE contractual establecido
+- Todos los campos obligatorios deben estar completos antes de enviar la cotización
+- La cotización solo puede ser enviada si el FM tiene permisos suficientes
+- No se puede editar una cotización después de ser aprobada por el cliente
+- El porcentaje de IGV es parametrizable pero por defecto es 18%
+- Para obras menores, es obligatorio adjuntar el formato especial LNT
+- El plazo de ejecución debe ser coherente con el plazo ofrecido por el proveedor
+- Si el FEE supera el 50% del monto base, se requiere justificación escrita
+
+### 15.12. Reglas de Negocio del Módulo
+
+- **RN-15.1**: El FM debe elaborar la cotización formal basándose en la cotización de proveedor aprobada
+- **RN-15.2**: Para clientes externos, el sistema debe validar que el FEE no exceda el margen FEE contractual
+- **RN-15.3**: Para clientes internos, el FEE es flexible pero requiere aprobación de Gerencia si supera el 50%
+- **RN-15.4**: El sistema debe calcular automáticamente el FEE, subtotal, IGV y monto total
+- **RN-15.5**: La cotización solo puede ser aprobada por el cliente o personal autorizado (según tipo de cliente)
+- **RN-15.6**: Una vez aprobada la cotización, se debe generar la solicitud de OC automáticamente o manualmente según configuración
+- **RN-15.7**: Para obras menores, es obligatorio utilizar el formato especial LNT
+- **RN-15.8**: El sistema debe permitir el envío de recordatorios al cliente si no ha respondido en 3 días
+- **RN-15.9**: Las cotizaciones aprobadas quedan bloqueadas y no pueden editarse sin autorización de Gerencia
+- **RN-15.10**: El código de cotización debe seguir el formato: COT-[Año]-[Mes]-[Correlativo]
+
+### 15.13. Formato Especial para Obras Menores (LNT)
+
+**Descripción**:
+Para servicios clasificados como "Obras Menores", el FM debe proporcionar un formato especial de cotización en la LNT (Línea de Negocio Tercerizada).
+
+**Características del Formato LNT**:
+- Plantilla predefinida en Excel o PDF
+- Incluye campos específicos para obras menores
+- Detalle de partidas y metrados
+- Especificaciones técnicas
+- Cronograma de ejecución
+- Garantías y penalidades
+
+**Funcionalidad del Sistema**:
+- Sistema identifica automáticamente si el servicio es "Obra Menor"
+- Alerta al FM que debe adjuntar formato LNT
+- Validación obligatoria del archivo adjunto antes de envío
+- Plantilla descargable desde el sistema
+
+### 15.14. Integración con Módulo de Orden de Compra (OC)
+
+**Flujo de Integración**:
+
+1. **Cotización Aprobada** → Estado cambia a "Aprobada"
+2. **FM solicita emisión de OC** → Sistema genera formato de cotización por proveedor
+3. **Sistema envía solicitud a Compras** → Notificación automática con datos necesarios
+4. **Compras emite OC** → Código de OC se registra en la cotización
+5. **Vínculo Cotización-OC** → Trazabilidad completa del proceso
+
+**Datos Transferidos a la OC**:
+- Proveedor seleccionado
+- Monto total aprobado
+- Descripción y alcance del servicio
+- Plazo de ejecución
+- Términos de pago
+- Contacto del proveedor
+
+### 15.15. Auditoría del Módulo
+
+El sistema debe registrar en auditoría:
+
+- Fecha y hora de creación de cotización
+- Usuario (FM) que creó la cotización
+- Cambios realizados en la cotización (antes de envío)
+- Fecha y hora de envío al cliente
+- Fecha y hora de aprobación/rechazo
+- Usuario (cliente) que aprobó o rechazó
+- Motivo de rechazo (si aplica)
+- Ajustes de FEE realizados
+- Fecha de solicitud de OC
+- Código de OC generada
+- Notificaciones enviadas (destinatario, fecha, hora)
+- Accesos al detalle de la cotización
+- Descargas de documentos
+
+### 15.16. Reportes del Módulo
+
+**Reportes Disponibles**:
+
+1. **Reporte de Cotizaciones por Estado**:
+   - Filtrado por estado (Pendiente, Enviada, Aprobada, etc.)
+   - Período de tiempo
+   - Exportable a Excel
+
+2. **Reporte de Cotizaciones por Cliente**:
+   - Listado de todas las cotizaciones por cliente
+   - Montos totales
+   - Tasas de aprobación
+
+3. **Reporte de FEE Aplicado**:
+   - Comparativa de FEE por tipo de cliente
+   - Promedio de FEE aplicado
+   - Análisis de rentabilidad
+
+4. **Reporte de Cotizaciones Pendientes**:
+   - Cotizaciones sin respuesta del cliente
+   - Días transcurridos desde envío
+   - Alertas de seguimiento
+
+5. **Reporte de Conversión a OC**:
+   - Cotizaciones aprobadas vs OC emitidas
+   - Tiempo promedio de conversión
+   - Estado de OC
+
