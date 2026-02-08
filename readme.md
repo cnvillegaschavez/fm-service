@@ -4930,3 +4930,1316 @@ El sistema debe registrar:
    - Sistema debe estar disponible 24/7
    - Mantenimientos programados fuera de horario laboral
    - Notificación previa de mantenimientos
+
+---
+
+## 17. EMISION DE ORDEN DE COMPRA PARA GASTOS
+
+### 17.1. Objetivo del Módulo
+
+Gestionar el proceso completo de emisión de Órdenes de Compra (OC) para gastos operativos, garantizando la trazabilidad desde la generación del engagement en SQLPED hasta la notificación al proveedor y el registro del parte de ingresos. El sistema debe automatizar validaciones, notificaciones y el flujo de información entre Service Desk, FM, Compras CSC y Proveedores.
+
+### 17.2. Flujo del Proceso
+
+#### 17.2.1. Generación de Engagement en SQLPED
+
+**Funcionalidad FM**: Sistema detecta y registra engagement
+
+**Proceso**:
+
+1. **Service Desk genera Código de Engagement en SQLPED**:
+   - Service Desk emite el código de engagement en el sistema SQLPED
+   - Sistema SQLPED valida y genera código único
+   - Engagement queda registrado con sus datos asociados
+
+2. **Sistema FM detecta nuevo Engagement**:
+   - Sistema FM monitorea automáticamente SQLPED
+   - Detecta nuevo engagement generado
+   - Registra automáticamente en base de datos FM
+
+3. **Notificación Automática**:
+   - Sistema genera notificación automática al Service Desk
+   - Correo confirmando que el engagement fue detectado por FM
+   - Se habilita el proceso de carga de documentos
+
+**Datos Capturados del Engagement**:
+- Código de Engagement SQLPED
+- Fecha de generación
+- Monto asociado
+- Tipo de servicio
+- Estado del engagement
+
+#### 17.2.2. Validación de Documentos Obligatorios
+
+**Funcionalidad FM**: Service Desk adjunta documentación y FM valida
+
+**Proceso**:
+
+1. **Service Desk adjunta información al sistema**:
+   - Código de Engagement SQLPED (obligatorio)
+   - Sustento de Ingresos y Gastos (obligatorio)
+   - Cotización aprobada por cliente y proveedor (obligatorio)
+
+2. **FM valida la documentación**:
+   - Sistema presenta lista de documentos obligatorios
+   - FM revisa cada documento adjuntado
+   - Verifica que la información sea correcta y completa
+   - Valida que los documentos correspondan al engagement
+
+3. **Validación del Sistema**:
+   - Código de engagement debe existir en SQLPED
+   - Todos los documentos obligatorios deben estar adjuntos
+   - Formatos de archivos deben ser válidos (PDF, Excel según tipo)
+   - Cotización debe estar en estado "Aprobada"
+
+4. **Gateway de Decisión: ¿Documentos obligatorios adjuntos?**:
+   - **SÍ**: Sistema permite continuar al siguiente paso
+   - **NO**: Sistema genera alerta y notifica a Service Desk
+     - Detalla qué documentos faltan
+     - Bloquea el avance hasta completar documentación
+     - Envía correo de recordatorio
+
+**Reglas de Validación**:
+- Documentos en formato PDF (máximo 10 MB por archivo)
+- Sustento de Ingresos debe coincidir con monto de engagement
+- Cotización debe tener firmas de aprobación (cliente y proveedor)
+- Documentos no deben tener más de 30 días de antigüedad
+
+#### 17.2.3. Aprobaciones Respectivas
+
+**Funcionalidad FM**: Sistema gestiona aprobaciones internas
+
+**Proceso**:
+
+1. **FM realiza aprobaciones con sus respectivas validaciones**:
+   - FM revisa el paquete completo de documentos
+   - Valida montos, plazos y condiciones
+   - Verifica coherencia entre documentos
+   - Aprueba o solicita correcciones
+
+2. **Niveles de Aprobación** (según monto):
+   - **Monto < 50,000**: Aprobación de FM
+   - **Monto ≥ 50,000**: Aprobación de FM + Gerente FM
+   - **Monto ≥ 100,000**: FM + Gerente FM + Gerente General
+
+3. **Sistema registra aprobaciones**:
+   - Fecha y hora de cada aprobación
+   - Usuario aprobador
+   - Observaciones o comentarios
+   - Nivel de aprobación cumplido
+
+4. **Notificación de Aprobaciones**:
+   - Sistema notifica a cada aprobador en cadena
+   - Envío automático a siguiente nivel tras cada aprobación
+   - Alerta si aprobación está pendiente más de 24 horas
+
+#### 17.2.4. Envío de Datos a Compras CSC
+
+**Funcionalidad FM**: Sistema compila y envía información a Compras
+
+**Proceso**:
+
+1. **FM envía la información (data) a Compras CSC**:
+   - Sistema compila todos los documentos aprobados
+   - Genera paquete de información completo
+   - Incluye resumen ejecutivo de la solicitud
+
+2. **Información Enviada a Compras**:
+   - Código de Engagement SQLPED
+   - Documentos obligatorios (Sustento, Cotización)
+   - Resumen de aprobaciones obtenidas
+   - Monto total autorizado
+   - Proveedor seleccionado
+   - Plazo de ejecución
+   - Observaciones de FM
+
+3. **Envío Automático**:
+   - Sistema envía correo a Compras CSC con:
+     - Documentos adjuntos (ZIP comprimido)
+     - Enlace al sistema FM para consulta
+     - Datos de contacto de FM
+     - Prioridad según monto y urgencia
+
+4. **Notificación al Sistema**:
+   - Sistema notifica a FM confirmación de envío
+   - Estado cambia a "Enviado a Compras"
+   - Se registra fecha y hora de envío
+
+#### 17.2.5. Compras Sube la OC al Sistema
+
+**Funcionalidad FM**: Compras CSC genera OC y la registra en FM, con validación especial para Venta Empresa
+
+**Proceso General**:
+
+1. **Compras CSC genera la Orden de Compra**:
+   - Compras recibe la información de FM
+   - Genera OC en su sistema CSC
+   - OC incluye código único CSC
+
+2. **Compras CSC sube la OC al sistema FM**:
+   - Compras accede al módulo de registro de OC en FM
+   - Ingresa código de OC CSC
+   - Adjunta archivo PDF de la OC definitiva
+   - Registra fecha de emisión
+
+3. **Validación del Sistema FM**:
+   - Verifica que el archivo sea formato PDF
+   - Valida que el código de OC sea único
+   - Confirma que contenga firma digital o sello de Compras
+   - Tamaño máximo: 10 MB
+
+4. **Sistema almacena la OC**:
+   - OC se guarda en repositorio del sistema
+   - Se vincula automáticamente con el engagement correspondiente
+   - Estado cambia a "OC Generada"
+
+---
+
+#### 17.2.5.1. Validación Especial: Venta Empresa
+
+**Funcionalidad FM**: Sistema detecta y valida automáticamente cotizaciones de empresas proveedoras registradas
+
+**Descripción**:
+El sistema debe procesar automáticamente las cotizaciones recibidas por correo electrónico de empresas proveedoras registradas en el módulo de Venta Empresa, validando la información, autorizando compras dentro de límites establecidos y gestionando aprobaciones cuando se excedan los montos permitidos.
+
+**Empresas de Venta Empresa**:
+- El sistema permite configurar múltiples empresas proveedoras
+- Ejemplos: Sodimac, Promart, Maestro, Cassinelli, etc.
+- Lista configurable desde el módulo de Datos Maestros
+
+**Proceso de Validación**:
+
+##### 1. Detección Automática de Correos de Venta Empresa
+
+**Funcionalidad**:
+- Sistema monitorea bandeja de entrada de correos FM
+- Detecta correos de empresas Venta Empresa registradas
+- Valida asunto del correo con palabra clave: **"Atención"**
+
+**Criterios de Detección**:
+- **Remitente**: Debe ser dominio de correo de empresa registrada en el sistema
+- **Asunto**: Debe contener la palabra clave configurada (por defecto: **"Atención"**)
+- **Formato**: Correo debe tener estructura de cotización estándar según plantilla configurada
+
+**Acción del Sistema**:
+- Si detecta correo válido → Inicia proceso de extracción de datos
+- Si no cumple criterios → Correo se trata como correspondencia normal
+
+##### 2. Extracción Automática de Información del Correo
+
+**Funcionalidad**: Sistema extrae automáticamente la siguiente información del correo
+
+**Datos Extraídos**:
+
+1. **Número de Cotización**:
+   - Formato configurable según empresa proveedora
+   - Ejemplos: VE-XXXXXX (Promart), X-XXXXXXX-X (Sodimac), COT-XXXXX (otros)
+   - Sistema detecta formato automáticamente según patrón configurado
+   - Campo obligatorio para identificación única
+
+2. **Venta Empresa Emisora**:
+   - Sistema identifica automáticamente la empresa proveedora
+   - Se determina por dominio del remitente configurado en el sistema
+   - También puede identificarse por logo, footer o firma del correo
+
+3. **Sucursal de Venta Empresa**:
+   - Ubicación de la tienda/sucursal/sede del proveedor
+   - Dato obtenido del campo "Local", "Sucursal", "Tienda" o "Despacho" en cotización
+   - Campo configurable según formato de cada empresa
+
+4. **Persona Encargada de Gestionar la Compra**:
+   - Nombre completo del usuario técnico FM
+   - Ejemplo: YAMIL ADRIAN PIERRE CUBAS JIMENEZ, ARTURO MIRO ROJAS RUIZ
+   - Campo: "Persona encargada" o "DNI de encargado"
+
+5. **Descripción de los Items**:
+   - Tabla completa con:
+     - SKU / Código de Producto
+     - Descripción del producto
+     - Cantidad
+     - Precio Unitario Neto
+     - Total por Item
+   - Sistema captura cada línea de la tabla de productos
+
+6. **Monto Total (incluido IGV)**:
+   - Monto total de la cotización con IGV incluido
+   - Formato: S/ XXX.XX o $ XXX.XX según moneda
+   - Campo: "TOTAL", "Monto Total" o "Total a Pagar" en la cotización
+
+7. **Usuario FM Destinatario del Correo**:
+   - Usuario FM al cual va dirigido el correo
+   - Opciones: Victor, Ana, Marco (u otros FM registrados)
+   - Sistema identifica por campo "Para:" o "Generado por:"
+
+**Validaciones de Extracción**:
+- Todos los campos obligatorios deben ser extraídos correctamente
+- Si falta información crítica → Sistema genera alerta y solicita revisión manual
+- Monto debe ser numérico y mayor a 0
+- Número de cotización debe ser único (no duplicado en sistema)
+
+##### 3. Validación de Persona Encargada y Monto
+
+**Funcionalidad**: Sistema valida dos campos críticos antes de aprobar
+
+**Campo 1: Validación de Persona Encargada**
+
+1. **Sistema verifica si la persona encargada está registrada**:
+   - Consulta base de datos de usuarios técnicos FM registrados
+   - Compara nombre completo o DNI con lista de usuarios autorizados
+
+2. **Resultado de Validación**:
+   - **PERSONA REGISTRADA**: Sistema continúa con validación de monto
+   - **PERSONA NO REGISTRADA**: Sistema rechaza automáticamente y notifica:
+     - Al FM destinatario del correo
+     - Motivo: "Persona encargada no está registrada en el sistema"
+     - Acción requerida: Registrar usuario o solicitar cambio de responsable
+
+**Campo 2: Validación de Monto por Comprar**
+
+**Regla de Negocio**:
+- **Límite autorizado**: S/. 200 por compra
+- **Frecuencia**: Máximo 1 compra autorizada automáticamente al mes por FM para cada usuario técnico
+
+**Proceso de Validación**:
+
+1. **Si Monto ≤ S/. 200 Y usuario no ha excedido intentos del mes**:
+   - Sistema aprueba automáticamente la compra
+   - Envía correo de aprobación a Venta Empresa emisora
+   - Registra compra en historial del usuario técnico
+   - Estado: "Aprobada Automáticamente"
+   - Descuenta 1 intento libre del mes para ese usuario
+
+2. **Si Monto > S/. 200 O usuario ya excedió intentos del mes**:
+   - Sistema NO aprueba automáticamente
+   - Inicia proceso de aprobación manual
+   - Notifica al validador FM correspondiente
+
+**Condiciones de Rechazo Automático**:
+- Monto supera S/. 200 en una sola compra
+- Usuario técnico ya realizó su compra mensual autorizada
+- Acumulado mensual del usuario supera el límite configurado
+
+##### 4. Proceso de Aprobación Manual (cuando se exceden límites)
+
+**Funcionalidad**: Sistema solicita aprobación del FM validador
+
+**Proceso**:
+
+1. **Sistema identifica que se requiere aprobación manual**:
+   - Por monto superior a S/. 200
+   - Por intentos libres agotados del usuario técnico
+
+2. **Sistema notifica al validador FM correspondiente**:
+   
+   **Notificación mediante Llamada Automática** (opcional según configuración):
+   - Sistema realiza llamada automática al FM aprobador
+   - Mensaje de voz: "Tiene una solicitud de aprobación de Venta Empresa pendiente"
+   - Informa: Número de cotización, monto, usuario solicitante
+
+   **Notificación por WhatsApp**:
+   - Sistema envía mensaje de WhatsApp al usuario FM aprobador
+   - **Contenido del mensaje**:
+   ```
+   🔔 SOLICITUD DE APROBACIÓN - VENTA EMPRESA
+   
+   Cotización: [Nro Cotización]
+   Empresa: [Sodimac/Promart]
+   Sucursal: [Nombre Sucursal]
+   Usuario Técnico: [Nombre Persona Encargada]
+   Monto Total: S/ [Monto con IGV]
+   
+   Motivo de Aprobación:
+   [X] Monto supera S/. 200
+   [X] Usuario agotó intentos del mes
+   
+   Por favor, ingrese al sistema para aprobar o rechazar:
+   [Enlace al Sistema]
+   ```
+
+   **Notificación en el Sistema**:
+   - Alerta en panel del FM aprobador
+   - Badge de notificación pendiente
+   - Enlace directo a la solicitud
+
+3. **FM aprobador ingresa al sistema**:
+   - Accede al módulo de "Aprobaciones Venta Empresa"
+   - Visualiza detalle completo de la cotización
+   - Revisa:
+     - Datos de la cotización (items, montos)
+     - Historial del usuario técnico solicitante
+     - Justificación de la compra (si fue cargada)
+     - Documentos adjuntos
+
+4. **FM aprobador toma decisión**:
+   
+   **Opción A: APROBAR**
+   - FM hace clic en botón "Aprobar Venta Empresa"
+   - Sistema solicita confirmación
+   - Sistema registra aprobación con:
+     - Fecha y hora
+     - Usuario aprobador
+     - Observaciones (opcional)
+   - Sistema envía correo de aprobación a Venta Empresa emisora
+   - Estado cambia a: "Aprobada por FM"
+   
+   **Opción B: RECHAZAR**
+   - FM hace clic en botón "Rechazar"
+   - Sistema solicita motivo de rechazo (obligatorio)
+   - Sistema registra rechazo
+   - Sistema envía notificación al usuario técnico
+   - Sistema envía correo a Venta Empresa cancelando solicitud
+   - Estado cambia a: "Rechazada"
+
+##### 5. Aprobación Automática (cuando cumple límites)
+
+**Funcionalidad**: Sistema aprueba sin intervención manual
+
+**Condiciones para Aprobación Automática**:
+- Persona encargada está registrada en sistema ✓
+- Monto ≤ S/. 200 ✓
+- Usuario técnico NO ha agotado su intento mensual ✓
+
+**Proceso**:
+
+1. **Sistema valida todas las condiciones**:
+   - Verifica persona encargada registrada
+   - Confirma monto dentro de límite
+   - Valida intentos disponibles del mes
+
+2. **Sistema genera aprobación automática**:
+   - Crea registro de aprobación
+   - Marca como "Aprobada Automáticamente"
+   - Descuenta intento mensual del usuario técnico
+
+3. **Sistema envía correo de aprobación a Venta Empresa**:
+   
+   **Asunto**: "Aprobación de Cotización [Nro Cotización] - Panorama BPO"
+   
+   **Cuerpo del Correo**:
+   ```
+   Estimado equipo de [Nombre Empresa Proveedora],
+   
+   Por medio del presente, confirmamos la aprobación de la siguiente cotización:
+   
+   Número de Cotización: [Nro Cotización]
+   Sucursal: [Nombre Sucursal]
+   Persona Encargada: [Nombre Usuario Técnico]
+   Monto Total: S/ [Monto con IGV]
+   
+   La compra ha sido aprobada automáticamente por el sistema.
+   El usuario encargado procederá con la adquisición de los productos detallados.
+   
+   Detalle de Items:
+   [Tabla con SKU, Descripción, Cantidad, Monto]
+   
+   Atentamente,
+   Sistema FM - Panorama BPO
+   ```
+
+4. **Sistema notifica al usuario FM destinatario**:
+   - Correo de confirmación de aprobación automática
+   - Enlace para consultar la cotización aprobada
+   - Recordatorio de límite mensual restante
+
+##### 6. Adjuntar Correos al Código de Servicio
+
+**Funcionalidad**: Sistema vincula correos con sustentos de ingresos y gastos
+
+**Proceso**:
+
+1. **Sistema identifica código de servicio asociado**:
+   - Extrae código de servicio del sustento de ingresos y gastos
+   - Busca código en base de datos de solicitudes activas
+
+2. **Sistema adjunta correos de Venta Empresa**:
+   - Correo original de cotización de la empresa proveedora
+   - Correo de aprobación enviado por sistema
+   - Cualquier correo adicional relacionado al asunto
+
+3. **Sistema organiza adjuntos**:
+   - Crea carpeta digital con código de servicio
+   - Almacena todos los correos relacionados
+   - Indexa por fecha y tipo de correo
+   - Permite descarga en lote
+
+4. **Trazabilidad**:
+   - Sistema registra:
+     - Fecha de adjunto
+     - Usuario que realizó la vinculación
+     - Tipo de documento (cotización, aprobación, etc.)
+   - Historial disponible en auditoría
+
+**Reglas de Adjuntos**:
+- Correos se adjuntan en formato .eml o PDF
+- Mantener formato original para evidencia
+- Incluir todos los archivos adjuntos del correo (imágenes, PDFs)
+- No permitir eliminación de correos adjuntos (solo lectura)
+
+##### 7. Panel de Control de Venta Empresa
+
+**Funcionalidad**: Dashboard para gestión de cotizaciones Venta Empresa
+
+**Información Mostrada**:
+
+**Resumen General**:
+- Total de cotizaciones recibidas en el mes
+- Total aprobadas automáticamente
+- Total pendientes de aprobación
+- Total rechazadas
+- Monto acumulado del mes
+
+**Por Usuario Técnico**:
+- Nombre del usuario
+- Intentos utilizados en el mes
+- Intentos disponibles
+- Monto acumulado de compras aprobadas
+- Última compra realizada
+
+**Lista de Cotizaciones**:
+- Número de Cotización
+- Fecha de Recepción
+- Empresa Proveedora (nombre de la empresa)
+- Usuario Técnico
+- Monto
+- Estado (Aprobada Automática, Pendiente, Aprobada Manual, Rechazada)
+- FM Aprobador (si aplica)
+- Acciones (Ver detalle, Aprobar, Rechazar)
+
+**Filtros Disponibles**:
+- Por Estado
+- Por Empresa Proveedora (lista dinámica según empresas registradas)
+- Por Usuario Técnico
+- Por Rango de Fechas
+- Por Rango de Monto
+- Por FM Aprobador
+
+##### 8. Configuración de Parámetros de Venta Empresa
+
+**Funcionalidad**: Configuración de límites y reglas
+
+**Parámetros Configurables**:
+
+1. **Monto Límite para Aprobación Automática**:
+   - Valor por defecto: S/. 200
+   - Editable por Gerente FM
+   - Aplica para todos los usuarios técnicos
+
+2. **Intentos Mensuales por Usuario**:
+   - Valor por defecto: 1 compra al mes
+   - Editable por Gerente FM
+   - Puede ser diferente por usuario o rol
+
+3. **FM Aprobadores**:
+   - Lista de FM autorizados para aprobar
+   - Asignación de usuarios técnicos a cada FM aprobador
+   - Configuración de métodos de notificación (correo, WhatsApp, llamada)
+
+4. **Empresas de Venta Empresa**:
+   - Lista de empresas proveedoras registradas (configurable)
+   - Ejemplos: Sodimac, Promart, Maestro, Cassinelli, etc.
+   - Dominios de correo autorizados por empresa
+   - Palabras clave en asunto para detección
+   - Formato de número de cotización por empresa
+   - Campos personalizados según plantilla de cada empresa
+
+5. **Usuarios Técnicos Registrados**:
+   - Lista de personas autorizadas para solicitar compras
+   - Nombre completo y DNI
+   - FM aprobador asignado
+   - Límites personalizados (si aplica)
+
+**Pantalla de Configuración**:
+- Accesible solo para Gerente FM y Administrador
+- Cambios requieren confirmación
+- Sistema registra historial de cambios de configuración
+- Cambios aplican desde el día siguiente (o inmediatamente según configuración)
+
+##### 9. Validaciones Adicionales para Venta Empresa
+
+1. **Validación de Duplicados**:
+   - Número de cotización debe ser único
+   - Sistema rechaza si cotización ya fue procesada
+   - Alerta si hay cotización similar en últimos 7 días
+
+2. **Validación de Vigencia**:
+   - Cotización no debe tener más de 30 días de antigüedad
+   - Sistema verifica fecha de emisión en correo
+   - Rechaza automáticamente si está vencida
+
+3. **Validación de Formato de Correo**:
+   - Correo debe tener estructura válida de cotización
+   - Debe contener tabla de productos
+   - Debe incluir monto total
+   - Si falta información → Requiere revisión manual
+
+4. **Validación de Moneda**:
+   - Sistema acepta solo Soles (S/.)
+   - Si cotización está en dólares → Solicita conversión manual
+   - Tipo de cambio configurable en sistema
+
+##### 10. Reportes de Venta Empresa
+
+**Reporte 1: Compras por Usuario Técnico**
+- Período seleccionable
+- Total de compras por usuario
+- Monto acumulado por usuario
+- Comparativa mes a mes
+- Exportable a Excel
+
+**Reporte 2: Aprobaciones por FM**
+- Cantidad de aprobaciones manuales por FM
+- Tiempo promedio de aprobación
+- Tasa de aprobación vs rechazo
+- Exportable a Excel
+
+**Reporte 3: Compras por Empresa Proveedora**
+- Total de compras por cada empresa proveedora registrada
+- Comparativa entre empresas (ej: Sodimac vs Promart vs Maestro)
+- Sucursales más frecuentes por empresa
+- Productos más solicitados por empresa
+- Comparativa de montos por empresa
+- Exportable a Excel
+
+**Reporte 4: Tendencias Mensuales**
+- Evolución de compras mes a mes
+- Tendencia de montos
+- Usuarios más activos
+- Gráficos de tendencia
+
+##### 11. Auditoría de Venta Empresa
+
+El sistema debe registrar:
+
+- Fecha y hora de recepción del correo
+- Datos extraídos automáticamente
+- Validaciones realizadas (persona encargada, monto)
+- Resultado de validación (aprobada automática o requiere aprobación)
+- Usuario FM aprobador (si aplica)
+- Fecha y hora de aprobación/rechazo
+- Motivo de rechazo (si aplica)
+- Correo de aprobación enviado (fecha, destinatario)
+- Correos adjuntados al código de servicio
+- Cambios de configuración de parámetros
+- Accesos al panel de Venta Empresa
+- Descargas de reportes
+
+#### 17.2.6. Sistema Notifica a FM
+
+**Funcionalidad FM**: Notificación automática de OC generada
+
+**Proceso**:
+
+1. **Sistema detecta que OC ha sido cargada**:
+   - Trigger automático al registrar OC en sistema
+   - Sistema genera notificación inmediata
+
+2. **El Sistema notifica a FM**:
+   - Correo automático a FM con:
+     - Código de OC CSC generado
+     - Código de Engagement asociado
+     - Monto de la OC
+     - Proveedor
+     - Enlace para descargar OC en PDF
+     - Estado actual
+
+3. **FM recibe notificación**:
+   - FM puede visualizar la OC desde el sistema
+   - Tiene acceso a descargar el PDF
+   - Puede consultar detalles completos
+
+4. **Registro de Notificación**:
+   - Sistema registra fecha y hora de envío
+   - Confirma lectura de correo
+   - Registra accesos a la OC
+
+#### 17.2.7. Envío de Documentación al Proveedor vía Email
+
+**Funcionalidad FM**: Sistema envía OC al proveedor automáticamente
+
+**Proceso**:
+
+1. **Sistema prepara el envío al proveedor**:
+   - Genera formato PDF de la OC
+   - Compila documentos adicionales si corresponde
+   - Prepara correo con plantilla predefinida
+
+2. **Sistema envía la documentación vía email al proveedor**:
+   - Correo automático al proveedor registrado
+   - Adjunta OC en formato PDF
+   - Incluye instrucciones de confirmación
+
+**Contenido del Correo al Proveedor**:
+
+**Asunto**: "Orden de Compra [Código OC] - [Nombre del Servicio]"
+
+**Cuerpo del Correo**:
+```
+Estimado Proveedor,
+
+Por medio del presente, le notificamos que se ha emitido la siguiente Orden de Compra:
+
+Código de OC: [Código OC CSC]
+Código de Engagement: [Código Engagement]
+Descripción: [Descripción del Servicio]
+Monto Total: [Moneda] [Monto]
+Plazo de Ejecución: [Días] días calendario
+
+Adjunto encontrará el documento oficial de la Orden de Compra.
+
+Por favor, confirme la recepción de este correo y su aceptación de la OC ingresando al sistema a través del siguiente enlace:
+[Enlace al Portal de Proveedores]
+
+Quedamos atentos a su confirmación.
+
+Atentamente,
+Área de Compras
+Panorama BPO
+```
+
+3. **Notificación de Envío**:
+   - Sistema notifica a FM que OC fue enviada al proveedor
+   - Registra fecha y hora de envío
+   - Estado cambia a "OC Enviada a Proveedor"
+
+#### 17.2.8. Sistema Envía Documentación al Proveedor en el Sistema
+
+**Funcionalidad FM**: Portal de Proveedores recibe OC
+
+**Proceso**:
+
+1. **Sistema habilita OC en Portal de Proveedores**:
+   - OC queda disponible en portal del proveedor
+   - Proveedor accede con sus credenciales
+   - Visualiza OC completa con todos los detalles
+
+2. **Proveedor revisa la OC en el sistema**:
+   - Descarga PDF de la OC
+   - Revisa términos y condiciones
+   - Consulta detalle del servicio solicitado
+
+3. **Proveedor confirma recepción y aceptación**:
+   - Proveedor hace clic en "Confirmar Recepción"
+   - Sistema solicita confirmación de aceptación de términos
+   - Proveedor ingresa observaciones (opcional)
+
+4. **Sistema registra confirmación**:
+   - Fecha y hora de confirmación del proveedor
+   - Usuario del proveedor que confirmó
+   - Estado cambia a "OC Confirmada por Proveedor"
+
+5. **Notificación de Confirmación**:
+   - Sistema notifica a FM que proveedor confirmó OC
+   - Sistema notifica a Compras CSC
+   - Se registra en auditoría
+
+#### 17.2.9. Generación de Parte de Ingresos
+
+**Funcionalidad FM**: Relación OC con Parte de Ingresos
+
+**Proceso**:
+
+1. **Sistema relaciona OC con Parte de Ingresos**:
+   - Una vez confirmada la OC por el proveedor
+   - Sistema genera automáticamente correlación: **OC = Parte de Ingresos**
+   - Código de Parte de Ingresos se genera basado en código de OC
+
+2. **Registro de Parte de Ingresos**:
+   - Sistema crea registro de Parte de Ingresos
+   - Vincula con OC correspondiente
+   - Estado inicial: "Pendiente de Ingreso"
+
+3. **Información del Parte de Ingresos**:
+   - Código de OC CSC
+   - Código de Parte de Ingresos (autogenerado)
+   - Proveedor
+   - Monto esperado
+   - Fecha estimada de ingreso
+   - Descripción de productos/servicios
+
+4. **Notificación**:
+   - Sistema notifica a Logística/Almacén
+   - Notifica a FM sobre parte de ingreso generado
+   - Queda en espera de recepción física
+
+### 17.3. Estados de la Orden de Compra para Gastos
+
+El sistema debe gestionar los siguientes estados:
+
+1. **Engagement Detectado**: Sistema FM detectó engagement en SQLPED
+2. **Documentos en Carga**: Service Desk está adjuntando documentación
+3. **Documentos Incompletos**: Falta documentación obligatoria (Alerta)
+4. **En Validación FM**: FM está revisando documentos
+5. **En Proceso de Aprobación**: Esperando aprobaciones según nivel
+6. **Aprobado**: Todas las aprobaciones obtenidas
+7. **Enviado a Compras**: Información enviada a Compras CSC
+8. **OC en Proceso CSC**: Compras está generando OC
+9. **OC Generada**: Compras cargó OC en sistema FM
+10. **OC Enviada a Proveedor**: OC enviada vía email y portal
+11. **OC Confirmada por Proveedor**: Proveedor aceptó OC
+12. **Parte de Ingresos Generado**: Sistema generó parte de ingresos
+13. **Proceso Finalizado**: OC completada y cerrada
+
+### 17.4. Pantallas del Módulo
+
+#### 17.4.1. Pantalla de Registro de Engagement y Documentos
+
+**Campos**:
+- Código de Engagement SQLPED (obligatorio, validado con SQLPED)
+- Fecha de Generación Engagement (solo lectura, automático)
+- Monto del Engagement (solo lectura, automático desde SQLPED)
+- Tipo de Servicio (lista desplegable)
+- Adjuntar Sustento de Ingresos y Gastos (obligatorio, PDF/Excel)
+- Adjuntar Cotización Aprobada (obligatorio, PDF)
+- Proveedor (desde cotización, solo lectura)
+- Observaciones (opcional, texto libre)
+
+**Validaciones**:
+- Código de engagement debe existir en SQLPED
+- Documentos en formato PDF o Excel según tipo
+- Tamaño máximo por archivo: 10 MB
+- Cotización debe estar firmada y aprobada
+- Monto sustento debe coincidir con monto engagement
+
+**Botones**:
+- Guardar como Borrador
+- Enviar a Validación FM
+- Cancelar
+
+#### 17.4.2. Pantalla de Validación y Aprobación (FM)
+
+**Información Mostrada**:
+- Código de Engagement SQLPED
+- Código de Solicitud FM (generado)
+- Service Desk que cargó información
+- Fecha de Carga
+- Monto Total
+- Proveedor
+- Lista de Documentos Adjuntos (con vista previa)
+- Estado Actual
+
+**Acciones Disponibles**:
+- Descargar Documentos
+- Validar Documentos (marca como validados)
+- Solicitar Correcciones (regresa a Service Desk)
+- Aprobar (si FM tiene autoridad según monto)
+- Enviar a Aprobación Superior (si monto requiere)
+- Rechazar (con motivo obligatorio)
+
+**Validaciones**:
+- Todos los documentos deben estar validados antes de aprobar
+- Observaciones obligatorias si se solicitan correcciones
+- Motivo obligatorio si se rechaza
+
+#### 17.4.3. Pantalla de Carga de OC (Compras CSC)
+
+**Campos** (solo accesible para rol Compras):
+- Código de Solicitud FM (solo lectura)
+- Código de Engagement (solo lectura)
+- Código de OC CSC (obligatorio, único)
+- Fecha de Emisión OC (obligatorio)
+- Adjuntar OC en PDF (obligatorio)
+- Monto OC (obligatorio, debe coincidir con solicitud)
+- Términos de Pago (lista desplegable)
+- Plazo de Entrega (número de días)
+- Observaciones de Compras (opcional)
+
+**Validaciones**:
+- Código de OC debe ser único en el sistema
+- Archivo debe ser formato PDF
+- Tamaño máximo: 10 MB
+- Monto OC debe coincidir con monto aprobado (±2% tolerancia)
+- Fecha de emisión no puede ser futura
+
+**Botones**:
+- Registrar OC
+- Guardar Borrador
+- Cancelar
+
+#### 17.4.4. Pantalla de Seguimiento de OC
+
+**Filtros**:
+- Por Estado
+- Por Fecha de Solicitud
+- Por Proveedor
+- Por Rango de Monto
+- Por Código de Engagement
+- Por Código de OC
+
+**Información Mostrada** (tabla):
+- Código de Solicitud FM
+- Código de Engagement
+- Código de OC CSC
+- Estado Actual (con indicador de color)
+- Fecha de Solicitud
+- Fecha de OC Generada
+- Proveedor
+- Monto
+- Días en Proceso
+- Responsable Actual
+
+**Acciones Disponibles**:
+- Ver Detalle Completo
+- Descargar OC (si existe)
+- Descargar Documentos
+- Ver Auditoría
+- Imprimir Resumen
+- Exportar a Excel
+
+#### 17.4.5. Portal de Proveedores - Visualización de OC
+
+**Información Mostrada** (vista proveedor):
+- Código de OC
+- Fecha de Emisión
+- Monto Total
+- Descripción del Servicio
+- Plazo de Ejecución
+- Términos de Pago
+- Condiciones Especiales
+- Contacto de Compras
+- Documentos Adjuntos (OC en PDF)
+
+**Acciones Disponibles**:
+- Descargar OC en PDF
+- Confirmar Recepción
+- Aceptar Términos
+- Agregar Observaciones
+- Ver Historial de OC
+
+**Validaciones**:
+- Proveedor debe confirmar recepción en máximo 48 horas
+- Sistema envía recordatorio si no confirma en 24 horas
+- Aceptación de términos es obligatoria para continuar
+
+### 17.5. Notificaciones Automáticas
+
+#### 17.5.1. Notificación: Engagement Detectado
+- **Destinatarios**: Service Desk FM
+- **Trigger**: Sistema detecta nuevo engagement en SQLPED
+- **Contenido**:
+  - Código de Engagement
+  - Monto asociado
+  - Enlace para cargar documentos
+  - Lista de documentos obligatorios
+
+#### 17.5.2. Notificación: Documentos Incompletos
+- **Destinatarios**: Service Desk FM
+- **Trigger**: FM solicita correcciones o faltan documentos
+- **Contenido**:
+  - Código de Solicitud
+  - Lista de documentos faltantes o con errores
+  - Observaciones de FM
+  - Enlace para completar
+
+#### 17.5.3. Notificación: Aprobación Pendiente
+- **Destinatarios**: Aprobadores (Gerente FM, Gerente General según nivel)
+- **Trigger**: Solicitud enviada a aprobación
+- **Contenido**:
+  - Código de Solicitud
+  - Monto a aprobar
+  - Proveedor
+  - Enlace para revisar y aprobar
+  - Resumen de documentos
+
+#### 17.5.4. Notificación: Solicitud Aprobada y Enviada a Compras
+- **Destinatarios**: Área de Compras CSC
+- **Trigger**: Solicitud aprobada y enviada
+- **Contenido**:
+  - Código de Solicitud FM
+  - Código de Engagement
+  - Proveedor
+  - Monto autorizado
+  - Documentos adjuntos (ZIP)
+  - Enlace al sistema FM
+  - Plazo sugerido de emisión de OC
+
+#### 17.5.5. Notificación: OC Generada
+- **Destinatarios**: FM, Service Desk, Gerente FM
+- **Trigger**: Compras registra OC en sistema
+- **Contenido**:
+  - Código de OC CSC
+  - Código de Solicitud FM
+  - Código de Engagement
+  - Fecha de Emisión
+  - Monto OC
+  - Enlace para descargar OC
+
+#### 17.5.6. Notificación: OC Enviada a Proveedor
+- **Destinatarios**: Proveedor
+- **Trigger**: Sistema envía OC
+- **Contenido**:
+  - Código de OC
+  - Monto
+  - Descripción del servicio
+  - OC en PDF adjunta
+  - Enlace al portal de proveedores
+  - Instrucciones de confirmación
+  - Plazo para confirmar recepción
+
+#### 17.5.7. Notificación: Proveedor Confirmó OC
+- **Destinatarios**: FM, Compras CSC
+- **Trigger**: Proveedor confirma recepción y aceptación
+- **Contenido**:
+  - Código de OC
+  - Proveedor
+  - Fecha y hora de confirmación
+  - Observaciones del proveedor (si las hay)
+
+#### 17.5.8. Notificación: Parte de Ingresos Generado
+- **Destinatarios**: Logística/Almacén, FM
+- **Trigger**: Sistema genera parte de ingresos
+- **Contenido**:
+  - Código de Parte de Ingresos
+  - Código de OC asociado
+  - Proveedor
+  - Descripción de productos/servicios
+  - Fecha estimada de ingreso
+  - Enlace para registrar recepción
+
+### 17.6. Reglas de Negocio
+
+#### 17.6.1. Validación de Engagement
+
+1. **Engagement Válido**:
+   - Debe existir en sistema SQLPED
+   - Debe estar activo
+   - No debe estar asociado a otra solicitud de OC
+   - Fecha de generación no mayor a 90 días
+
+2. **Montos y Límites**:
+   - Monto mínimo para generar OC: S/. 500
+   - Monto máximo sin aprobación gerencial: S/. 50,000
+   - Montos superiores requieren aprobaciones escalonadas
+
+#### 17.6.2. Documentación Obligatoria
+
+**Documentos Requeridos**:
+1. Código de Engagement SQLPED válido
+2. Sustento de Ingresos y Gastos actualizado (máximo 30 días)
+3. Cotización aprobada por cliente y proveedor con firmas
+
+**Regla**: Sistema NO permite avanzar sin documentación completa
+
+#### 17.6.3. Aprobaciones Escalonadas
+
+1. **Monto < S/. 50,000**:
+   - Aprobación: FM
+   - Tiempo máximo: 24 horas
+
+2. **Monto S/. 50,000 - S/. 100,000**:
+   - Aprobación: FM + Gerente FM
+   - Tiempo máximo: 48 horas
+
+3. **Monto > S/. 100,000**:
+   - Aprobación: FM + Gerente FM + Gerente General
+   - Tiempo máximo: 72 horas
+
+**Regla**: Si se excede el tiempo, sistema envía escalamiento automático
+
+#### 17.6.4. Confirmación de Proveedor
+
+- Proveedor debe confirmar recepción en máximo 48 horas
+- Sistema envía recordatorio a las 24 horas
+- Si no confirma en 48 horas, sistema alerta a FM
+- FM puede marcar como "Confirmada manualmente" con justificación
+
+#### 17.6.5. Generación de Parte de Ingresos
+
+- Sistema genera automáticamente parte de ingresos al confirmar OC
+- Relación 1:1 entre OC y Parte de Ingresos
+- Código de Parte de Ingresos formato: PI-[AñoMes]-[Correlativo]
+- Parte de Ingresos queda pendiente hasta recepción física
+
+#### 17.6.6. Formatos Permitidos
+
+- **Sustento de Ingresos y Gastos**: PDF, Excel (máx. 5 MB)
+- **Cotización**: PDF (máx. 10 MB)
+- **OC Definitiva**: Solo PDF (máx. 10 MB)
+
+### 17.7. Integraciones
+
+#### 17.7.1. Integración con SQLPED
+
+**Tipo**: Lectura automática en tiempo real
+
+**Frecuencia**: Cada 5 minutos o en tiempo real (webhook)
+
+**Datos Obtenidos**:
+- Código de Engagement
+- Fecha de Generación
+- Monto Asociado
+- Estado del Engagement
+- Tipo de Servicio
+- Cliente/Sede
+
+**Acción del Sistema**:
+- Detecta nuevo engagement
+- Valida que no esté duplicado
+- Genera notificación automática
+- Actualiza base de datos FM
+- Crea registro de solicitud inicial
+
+#### 17.7.2. Integración con Sistema de Compras (CSC)
+
+**Tipo**: Bidireccional
+
+**FM → CSC** (envío de solicitudes):
+- Código de Engagement
+- Documentos obligatorios
+- Aprobaciones obtenidas
+- Datos del proveedor
+- Monto autorizado
+
+**CSC → FM** (respuesta con OC):
+- Código de OC CSC
+- Fecha de Emisión
+- OC en formato PDF
+- Estado de la OC
+- Términos y condiciones
+
+**Método de Integración**:
+- API REST o SOAP
+- Autenticación OAuth 2.0
+- Notificaciones mediante webhooks
+- Backup manual si API no disponible
+
+#### 17.7.3. Integración con Portal de Proveedores
+
+**Tipo**: Publicación automática
+
+**Datos Publicados**:
+- OC completa en PDF
+- Términos y condiciones
+- Instrucciones de confirmación
+- Contactos de Compras
+
+**Funcionalidades**:
+- Descarga de OC
+- Confirmación de recepción
+- Aceptación de términos
+- Carga de observaciones
+
+### 17.8. Auditoría del Módulo
+
+El sistema debe registrar en auditoría:
+
+- Fecha y hora de detección de engagement
+- Usuario (Service Desk) que cargó documentos
+- Cambios en documentos adjuntos
+- Usuario (FM) que validó documentos
+- Aprobadores y fechas de cada aprobación
+- Fecha de envío a Compras CSC
+- Usuario (Compras) que cargó OC
+- Fecha de envío de OC a proveedor
+- Fecha y hora de confirmación del proveedor
+- Generación de parte de ingresos
+- Accesos a documentos (quién y cuándo)
+- Descargas de OC (usuario, fecha, hora)
+- Modificaciones de estado
+- Notificaciones enviadas (destinatario, fecha, hora)
+
+### 17.9. Reportes del Módulo
+
+#### 17.9.1. Reporte de OC por Estado
+
+**Filtros**:
+- Estado
+- Rango de Fechas
+- Proveedor
+- Rango de Monto
+
+**Datos Mostrados**:
+- Código de Solicitud FM
+- Código de Engagement
+- Código de OC CSC
+- Estado Actual
+- Proveedor
+- Monto
+- Días en Proceso
+- Responsable Actual
+
+**Exportable a**: Excel, PDF
+
+#### 17.9.2. Reporte de Tiempo de Proceso
+
+**Análisis**:
+- Tiempo promedio desde engagement hasta OC generada
+- Tiempo promedio desde OC generada hasta confirmación de proveedor
+- Identificación de cuellos de botella por etapa
+
+**Datos Mostrados**:
+- Etapa del Proceso
+- Tiempo Promedio
+- Tiempo Mínimo
+- Tiempo Máximo
+- Cantidad de Casos
+- Porcentaje del Total
+
+**Gráficos**:
+- Diagrama de barras por etapa
+- Tendencia mensual de tiempos
+- Comparativa por proveedor
+
+#### 17.9.3. Reporte de Aprobaciones Pendientes
+
+**Filtros**:
+- Aprobador
+- Rango de Montos
+- Antigüedad (días pendientes)
+
+**Datos Mostrados**:
+- Código de Solicitud
+- Fecha de Solicitud
+- Monto
+- Proveedor
+- Aprobador Pendiente
+- Días Pendiente
+- Nivel de Urgencia
+
+**Acciones**:
+- Enviar recordatorio individual
+- Enviar recordatorio masivo
+- Escalar a superior
+
+#### 17.9.4. Reporte de OC por Proveedor
+
+**Filtros**:
+- Proveedor
+- Período
+- Estado
+
+**Datos Mostrados**:
+- Proveedor
+- Cantidad de OC emitidas
+- Monto total
+- Promedio por OC
+- Tiempo promedio de confirmación
+- Estado de cada OC
+
+**Exportable a**: Excel, PDF
+
+#### 17.9.5. Reporte de Partes de Ingresos Pendientes
+
+**Objetivo**: Identificar partes de ingreso generados pero no recepcionados
+
+**Datos Mostrados**:
+- Código de Parte de Ingresos
+- Código de OC Asociado
+- Proveedor
+- Fecha de Generación
+- Días Pendiente
+- Monto
+- Estado
+
+**Acciones**:
+- Notificar a Logística
+- Marcar como recepcionado
+- Ver detalle
+
+### 17.10. Alertas del Sistema
+
+#### 17.10.1. Alerta: Nuevo Engagement Detectado
+- **Tipo**: Notificación automática
+- **Destinatario**: Service Desk FM
+- **Urgencia**: Normal
+- **Acción Requerida**: Cargar documentos obligatorios en 24 horas
+
+#### 17.10.2. Alerta: Documentos Incompletos
+- **Tipo**: Advertencia
+- **Destinatario**: Service Desk FM
+- **Urgencia**: Alta
+- **Acción Requerida**: Completar documentación de inmediato
+
+#### 17.10.3. Alerta: Aprobación Pendiente
+- **Tipo**: Recordatorio
+- **Destinatario**: Aprobador correspondiente
+- **Frecuencia**: Diaria hasta que se apruebe
+- **Acción Requerida**: Revisar y aprobar/rechazar
+
+#### 17.10.4. Alerta: Tiempo de Aprobación Excedido
+- **Tipo**: Escalamiento
+- **Destinatario**: Superior del aprobador + Gerente FM
+- **Trigger**: Se excedió tiempo máximo de aprobación
+- **Acción Requerida**: Intervención inmediata
+
+#### 17.10.5. Alerta: OC Generada
+- **Tipo**: Información
+- **Destinatario**: FM, Service Desk
+- **Urgencia**: Normal
+- **Acción Requerida**: Revisar OC generada
+
+#### 17.10.6. Alerta: Proveedor No Confirmó OC
+- **Tipo**: Advertencia
+- **Destinatario**: FM
+- **Trigger**: 24 horas sin confirmación de proveedor
+- **Acción Requerida**: Contactar al proveedor
+
+#### 17.10.7. Alerta: Parte de Ingresos Pendiente
+- **Tipo**: Recordatorio
+- **Destinatario**: Logística/Almacén, FM
+- **Frecuencia**: Cada 3 días
+- **Acción Requerida**: Recepcionar productos/servicios
+
+### 17.11. Validaciones Adicionales
+
+1. **Código de Engagement**:
+   - Debe existir en sistema SQLPED
+   - Debe estar activo
+   - No debe estar asociado a otra solicitud
+   - Antigüedad máxima: 90 días
+
+2. **Sustento de Ingresos y Gastos**:
+   - Formato PDF o Excel
+   - Tamaño máximo: 5 MB
+   - Fecha de elaboración no mayor a 30 días
+   - Monto debe coincidir con engagement (±2% tolerancia)
+
+3. **Cotización Aprobada**:
+   - Debe estar en estado "Aprobada"
+   - Debe contener firmas de cliente y proveedor
+   - Formato PDF
+   - Tamaño máximo: 10 MB
+   - Vigencia no vencida
+
+4. **OC Generada por Compras**:
+   - Código único (no duplicado)
+   - Formato PDF obligatorio
+   - Monto debe coincidir con aprobado (±2% tolerancia)
+   - Debe contener sello/firma de Compras
+   - Tamaño máximo: 10 MB
+
+5. **Confirmación de Proveedor**:
+   - Debe realizarse dentro de 48 horas
+   - Usuario del proveedor debe estar registrado
+   - Aceptación de términos obligatoria
+
+### 17.12. Consideraciones Técnicas
+
+1. **Almacenamiento de Documentos**:
+   - Repositorio seguro con backup automático
+   - Versionado de documentos
+   - Retención mínima: 7 años
+   - Encriptación de archivos sensibles
+
+2. **Seguridad**:
+   - Autenticación de usuarios por rol
+   - Control de acceso granular
+   - Registro de todos los accesos
+   - Auditoría completa de acciones
+
+3. **Performance**:
+   - Carga de documentos: máximo 30 segundos
+   - Consulta de estado: tiempo de respuesta < 2 segundos
+   - Generación de reportes: máximo 1 minuto
+   - Notificaciones en tiempo real (< 5 segundos)
+
+4. **Disponibilidad**:
+   - Sistema disponible 24/7
+   - Mantenimientos programados fuera de horario laboral
+   - Notificación previa de mantenimientos (48 horas)
+   - Plan de contingencia ante caídas
+
+5. **Integraciones**:
+   - Monitoreo de conexión con SQLPED cada 5 minutos
+   - Reintentos automáticos en caso de fallo (3 intentos)
+   - Alertas a TI si integración falla
+   - Modo manual disponible si API no funciona
