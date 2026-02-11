@@ -91,8 +91,8 @@ Sistema que permite al Superadministrador registrar y administrar clientes con c
 
 #### 4.1.1. Código de Cliente
 - Autogenerado por el sistema
-- Formato: RUC-CECO
-- Ejemplo: 20123456789-001
+- Formato: RUC-Año
+- Ejemplo: 20123456789-2026
 - Campo de solo lectura
 
 #### 4.1.2. Nombre Completo / Razón Social
@@ -136,17 +136,22 @@ Sistema que permite al Superadministrador registrar y administrar clientes con c
 
 ### 4.2. Información de Contacto
 
-#### 4.2.1. Email
+#### 4.2.1. Nombres y Apellidos
+- Campo obligatorio
+- Validación de formato de texto
+
+#### 4.2.2. Email
 - Campo obligatorio
 - Validación de formato de correo electrónico
 - Correo electrónico corporativo del cliente
 
-#### 4.2.2. Teléfono
+#### 4.2.3. Teléfono nro de celular
 - Campo obligatorio
 - Formato numérico
 - Número de contacto principal del cliente
+- Posibilidad que pueden ser igual el nro de celular con whatsapp (check  para copiar)
 
-#### 4.2.3. WhatsApp
+#### 4.2.4. WhatsApp
 - Campo opcional
 - Formato numérico
 - Número de WhatsApp para contacto
@@ -225,13 +230,13 @@ El sistema debe generar automáticamente el Código de Cliente mediante la conca
 
 #### Fórmula:
 ```
-Código de Cliente = RUC + "-" + CECO
+Código de Cliente = RUC-Año
 ```
 
 #### Ejemplo:
 - RUC ingresado: `20123456789`
-- CECO ingresado: `001`
-- Código generado: `20123456789-001`
+- Año ingresado: `2026`
+- Código generado: `20123456789-2026`
 
 #### Reglas:
 - El código se genera automáticamente al guardar el registro del cliente
@@ -316,7 +321,7 @@ El sistema debe validar:
 #### 4.9.5. Generación Automática de Código de Cliente
 
 El sistema debe:
-- Generar automáticamente el Código de Cliente con el formato: RUC-CECO
+- Generar automáticamente el Código de Cliente con el formato: RUC-Año
 - Mostrar el código generado en el formulario
 - Permitir visualización del código antes de guardar el registro
 
@@ -344,7 +349,7 @@ El sistema debe registrar automáticamente:
 El sistema debe incluir:
 - Opción para enviar correo de bienvenida al cliente registrado
 - Plantilla de correo predefinida con:
-  - Asunto: "Bienvenido a Ruwaytech"
+  - Asunto: "Bienvenido a PANORAMA OUTSOURCING"
   - Mensaje de bienvenida personalizado
   - Código de cliente generado
   - Instrucciones de acceso al portal (si aplica)
@@ -495,8 +500,8 @@ Sistema que permite al Superadministrador registrar y administrar proveedores co
 
 #### 6.1.1. Código de Proveedor
 - Autogenerado por el sistema
-- Formato: RUC
-- Ejemplo: 20123456789
+- Formato: RUC-Año
+- Ejemplo: 20123456789-2026
 - Campo de solo lectura
 - Único en el sistema
 
@@ -533,7 +538,7 @@ Sistema que permite al Superadministrador registrar y administrar proveedores co
 - Catálogo completo de países
 - Campo obligatorio
 
-### 6.2. Información de Ubicación y Contacto
+### 6.2. Información de Ubicación 
 
 #### 6.2.1. Dirección del Proveedor
 - Campo obligatorio
@@ -551,22 +556,30 @@ Sistema que permite al Superadministrador registrar y administrar proveedores co
 - Ubicación de las oficinas del proveedor
 - Debe contar con funcionalidad de búsqueda
 
-#### 6.2.4. Email
+### 6.3. Información de Contacto
+
+#### 6.3.1. Nombres y apellidos
 - Campo obligatorio
 - Validación de formato de correo electrónico
 - Correo electrónico corporativo del proveedor
 
-#### 6.2.5. Teléfono
+
+#### 6.3.2. Email
+- Campo obligatorio
+- Validación de formato de correo electrónico
+- Correo electrónico corporativo del proveedor
+
+#### 6.3.3. Teléfono nro Celular
 - Campo obligatorio
 - Formato numérico
 - Número de contacto principal del proveedor
 
-#### 6.2.6. WhatsApp
+#### 6.3.4. WhatsApp
 - Campo opcional
 - Formato numérico
 - Número de WhatsApp para contacto
 
-### 6.3. Representante(s) del Proveedor
+### 6.4. Representante(s) del Proveedor
 
 El sistema debe permitir registrar uno o más representantes del proveedor. Cada representante debe contar con los siguientes datos:
 
@@ -1106,14 +1119,19 @@ El sistema debe manejar los siguientes estados del contrato:
   - Usuario que cargó el documento
   - Versión del documento (se inicia en v1.0)
 
-#### 9.3.2. Versionado de Documentos
+#### 9.3.2. Gestion de evidencias
+- El sistema debe permitir subir las evidencias del contrato ejemplo archivos de correos
+- Adjuntar imagenes - JPG, PNG
+
+
+#### 9.3.3. Versionado de Documentos
 - El sistema debe mantener historial completo de versiones
 - Cada nueva carga incrementa la versión
 - Formato de versión: v1.0, v1.1, v2.0, etc.
 - Se debe permitir descargar versiones anteriores
 - No se pueden eliminar versiones anteriores
 
-#### 9.3.3. Carga de Contrapropuestas
+#### 9.3.4. Carga de Contrapropuestas
 - Cuando el cliente envía contrapropuesta (por correo), FM debe cargarla al sistema
 - El sistema genera nueva versión automáticamente
 - Se notifica a los usuarios correspondientes
@@ -1169,6 +1187,8 @@ El sistema debe enviar notificaciones automáticas por correo electrónico en lo
 - Historial de notificaciones
 
 ### 9.6. Gestión de Firma Electrónica
+
+(Posibilidad de integrar con interfaces existentes)
 
 #### 9.6.1. Habilitación de Firma
 - Cuando el cliente acepta la propuesta (proceso manual), FM actualiza el estado en el sistema
@@ -1667,7 +1687,7 @@ Gestionar el tipo de cambio oficial del dólar estadounidense (USD) respecto al 
 #### 10.1.2. Consulta Manual del Tipo de Cambio
 
 **Permisos:**
-- Solo el **Superadministrador** puede ejecutar consulta manual
+- Solo el **Superadministrador** = **Gerente FM**,  puede ejecutar consulta manual
 
 **Funcionalidad:**
 - Botón "Consultar SUNAT" disponible en la pantalla de configuración
@@ -1699,11 +1719,10 @@ Gestionar el tipo de cambio oficial del dólar estadounidense (USD) respecto al 
   - Órdenes de Servicio
   - Reportes financieros
 
-**Reglas de Aplicación:**
-- Para conversiones de Soles a Dólares: se usa el **Tipo de Cambio Venta**
-- Para conversiones de Dólares a Soles: se usa el **Tipo de Cambio Compra**
-- El tipo de cambio usado en una transacción queda registrado en el documento
-- Los documentos mantienen el tipo de cambio del día de su creación
+#### 10.1.5. Registro de forma manual el tipo de cambio
+
+**Uso Transversal:**
+- En caso que no tenga respuesta del servicio de SUNAT el usuario de Gerente de FM puede registrar de forma manual en el sistema de FM
 
 #### 10.1.5. Validaciones y Alertas
 
@@ -1713,10 +1732,10 @@ Gestionar el tipo de cambio oficial del dólar estadounidense (USD) respecto al 
 - El sistema debe validar variaciones extremas (ej: más de 10% de diferencia con el día anterior)
 
 **Alertas:**
-- Si el tipo de cambio varía más del 5% respecto al día anterior, notificar a:
+- En caso que no se pudo sincronizar el tipo de cambio mediante el API de SUNAT, se debe noticar a los roles:
   - Gerente de FM
-  - Gerente General
-- Si no se actualiza por más de 48 horas, notificar a Superadministrador
+  - FM
+
 
 ### 10.2. Gestión de IGV (Impuesto General a las Ventas)
 
@@ -2350,7 +2369,6 @@ El sistema debe registrar todas las modificaciones realizadas en los datos maest
 
 Sistema que permite a los usuarios (clientes internos/externos) crear solicitudes de atención de incidencias de manera estructurada mediante categorías jerárquicas de mantenimiento, incluyendo carga de imágenes, descripción del problema, y asignación automática a equipos de FM según nivel de urgencia. El sistema genera tickets de servicio y notifica al personal correspondiente.
 
-**Frecuencia de Actualización**: Los datos y contraseñas de usuarios deben actualizarse cada 3 meses.
 
 ### 11.1. Tipos de Solicitud
 
@@ -2383,7 +2401,7 @@ El catálogo maestro de 3 niveles (ver sección 11.2.1) se mantiene completo par
 4. La solicitud queda registrada con estos 2 niveles de categorización
 5. El **tercer nivel (SUB UNIDAD DE MTTO)** existe en el catálogo pero NO aparece en ninguna pantalla del usuario
 
-**Nota para el Equipo de Desarrollo**: Implementar solo 2 componentes de selección (dropdowns) en cascada. El nivel 3 del catálogo es solo para consulta del administrador.
+**Nota para el Equipo de Desarrollo**: Implementar solo 2 componentes de selección (dropdowns) en cascada. El nivel 3 del catálogo es solo para consulta del **Gerente de FM** y **FMs**.
 
 #### 11.2.1. Catálogo Completo de Categorías de Mantenimiento
 
@@ -2627,13 +2645,14 @@ El catálogo maestro de 3 niveles (ver sección 11.2.1) se mantiene completo par
 
 El sistema debe permitir la creación y gestión de solicitudes de atención de incidencias con las siguientes funcionalidades:
 
+**Nota Importante:** La funcionalidad debe existir tanto en el portal del cliente y el modulo interno del FM.
+
 #### 11.3.1. Acceso al Módulo de Solicitud
 
 El sistema debe proporcionar:
 - Módulo "Solicitud de Atención de Incidencia" accesible desde el menú principal
 - Botón "Nueva Solicitud" o "Crear Incidencia" visible y destacado
 - Pantalla principal con historial de solicitudes previas del usuario
-- Interfaz intuitiva y responsiva para crear solicitudes
 
 #### 11.3.2. Funcionalidad de Tipo de Solicitud
 
@@ -2728,11 +2747,12 @@ El sistema debe incluir funcionalidad de análisis inteligente para:
 
 El sistema debe proporcionar:
 - Generación automática de código único al crear la solicitud
-- Formato: SRV-AAAA-NNNN
+- Formato: SRV-AAAA-MM-NNNN
   - SRV: Prefijo de Servicio
   - AAAA: Año actual
+  - MM: Mes
   - NNNN: Número secuencial
-- Ejemplo: SRV-2026-0001
+- Ejemplo: SRV-2026-01-0001
 - Contador secuencial que se reinicia cada año
 - Campo de solo lectura
 - Visualización del código generado inmediatamente después del envío
@@ -2784,7 +2804,7 @@ El sistema debe mostrar:
 
 #### 11.3.13. Gestión Administrativa del Catálogo
 
-El sistema debe permitir (solo usuarios administradores):
+El sistema debe permitir (solo usuarios administradores = Gerente FM):
 - Crear nuevos tipos de solicitud
 - Agregar, modificar o eliminar categorías (Nivel 1)
 - Agregar, modificar o eliminar unidades de MTTO (Nivel 2)
@@ -2795,12 +2815,13 @@ El sistema debe permitir (solo usuarios administradores):
 
 ### 11.4. Generación de Código de Servicio/Ticket
 
-**Formato Sugerido**: SRV-AAAA-NNNN
+**Formato Sugerido**: SRV-AAAA-MM-NNNN
 - **SRV**: Prefijo de Servicio
 - **AAAA**: Año actual (2026)
+- **MM**: Mes actual
 - **NNNN**: Número secuencial (0001, 0002, etc.)
 
-**Ejemplo**: SRV-2026-0001
+**Ejemplo**: SRV-2026-01-0001
 
 **Reglas**:
 - Código autogenerado al crear la solicitud
